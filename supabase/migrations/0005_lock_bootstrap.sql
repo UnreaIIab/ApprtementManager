@@ -1,0 +1,41 @@
+-- =====================================================================
+-- Take `bootstrap_workspace` off the public API surface
+-- =====================================================================
+-- `bootstrap_workspace` is a SECURITY DEFINER function that takes an arbitrary
+-- email and writes. PostgREST exposes everything in `public`, and nothing had
+-- revoked EXECUTE from `anon` — so an unauthenticated caller holding only the
+-- (publishable) anon key could:
+--
+--   * enumerate accounts, because a real address returns an org id while an
+--     unknown one returns "No auth user with email …";
+--   * create organisations for arbitrary existing users.
+--
+-- It is an administrative helper meant to be run in the SQL editor, where the
+-- session is `postgres` and function privileges do not apply. It has no reason
+-- to be reachable over HTTP at all.
+--
+-- The app's own path — `create_organization` in 0004 — is unaffected: it takes
+-- no user parameter, always makes the *caller* the owner, and is granted only
+-- to `authenticated`.
+--
+-- Safe to re-run.
+-- =====================================================================
+
+revoke all on function public.bootstrap_workspace(text, text, text, text)
+  from public, anon, authenticated;
+
+-- ---------------------------------------------------------------------
+-- Audit the rest of the surface
+-- ---------------------------------------------------------------------
+-- Every SECURITY DEFINER function in `public` that `anon` may still execute.
+-- `is_org_member` and `auth_org_ids` are expected here: RLS policies call them,
+-- so the querying role must retain EXECUTE, and they only ever report on
+-- `auth.uid()` — the caller themselves — so they disclose nothing.
+--
+--   select p.proname,
+--          has_function_privilege('anon', p.oid, 'execute')          as anon_can_run,
+--          has_function_privilege('authenticated', p.oid, 'execute') as user_can_run
+--   from pg_proc p
+--   join pg_namespace n on n.oid = p.pronamespace
+--   where n.nspname = 'public' and p.prosecdef
+--   order by 1;

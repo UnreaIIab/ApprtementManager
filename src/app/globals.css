@@ -1,0 +1,339 @@
+@import "tailwindcss";
+
+/* next-themes writes `class="dark"` on <html>; drive every dark rule from it
+   so the in-app toggle beats the OS preference in both directions. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* =====================================================================
+   Design tokens
+   Light and dark are separately selected values, not an automatic flip.
+   ===================================================================== */
+:root {
+  color-scheme: light;
+
+  /* Surfaces */
+  --plane: #f6f6f4;          /* page background */
+  --surface: #ffffff;        /* cards, panels, chart surface */
+  --surface-2: #fafaf9;      /* sunken rows, table headers */
+  --surface-3: #f1f1ef;      /* hover wash */
+  --overlay: rgb(23 24 26 / 0.44);
+
+  /* Ink */
+  --ink: #111114;
+  --ink-2: #56565a;
+  --ink-3: #8a8a88;
+
+  /* Lines */
+  --line: #e7e7e3;           /* hairline border */
+  --line-strong: #d5d5d0;
+  --grid: #ececE8;           /* chart gridline */
+  --axis: #cfcfc9;
+
+  /* Brand — a single accent, used for chrome only, never for data series */
+  --brand: #ff385c;
+  --brand-hover: #e11d48;
+  --brand-ink: #ffffff;
+  --brand-wash: #fff1f3;
+
+  /* Status — reserved, never reused as a series color */
+  --good: #0ca30c;
+  --good-wash: #eaf7ea;
+  --warning: #fab219;
+  --warning-wash: #fdf3e0;
+  --serious: #ec835a;
+  --serious-wash: #fdf0ea;
+  --critical: #d03b3b;
+  --critical-wash: #fbecec;
+  --info: #2a78d6;
+  --info-wash: #eaf2fd;
+  --neutral-wash: #f1f1ef;
+
+  /* Positive / negative deltas (text contrast, distinct from series green) */
+  --delta-up: #006300;
+  --delta-down: #b02a2a;
+
+  /* Categorical series — validated light steps (see docs/design.md) */
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+  --series-5: #e87ba4;
+  --series-6: #008300;
+  --series-7: #4a3aa7;
+  --series-8: #e34948;
+
+  /* Sequential ramp (single hue, light -> dark) */
+  --seq-1: #cde2fb;
+  --seq-2: #9ec5f4;
+  --seq-3: #6da7ec;
+  --seq-4: #3987e5;
+  --seq-5: #256abf;
+  --seq-6: #184f95;
+
+  --ring: #111114;
+  --shadow-color: 220 8% 12%;
+  --radius: 0.875rem;
+}
+
+.dark {
+  color-scheme: dark;
+
+  --plane: #0c0c0e;
+  --surface: #17181a;
+  --surface-2: #1d1e21;
+  --surface-3: #24262a;
+  --overlay: rgb(0 0 0 / 0.6);
+
+  --ink: #f7f7f6;
+  --ink-2: #a9a9a6;
+  --ink-3: #7c7c7a;
+
+  --line: #2a2c30;
+  --line-strong: #3a3d42;
+  --grid: #26282c;
+  --axis: #383b40;
+
+  --brand: #ff5a76;
+  --brand-hover: #ff7189;
+  --brand-ink: #1a0509;
+  --brand-wash: #2a1219;
+
+  --good: #0ca30c;
+  --good-wash: #142514;
+  --warning: #fab219;
+  --warning-wash: #2b2211;
+  --serious: #ec835a;
+  --serious-wash: #2b1c14;
+  --critical: #e05a5a;
+  --critical-wash: #2c1616;
+  --info: #3987e5;
+  --info-wash: #131f2e;
+  --neutral-wash: #24262a;
+
+  --delta-up: #0ca30c;
+  --delta-down: #e05a5a;
+
+  /* Same eight hues, re-stepped for the dark surface */
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+  --series-5: #d55181;
+  --series-6: #008300;
+  --series-7: #9085e9;
+  --series-8: #e66767;
+
+  --seq-1: #184f95;
+  --seq-2: #256abf;
+  --seq-3: #2a78d6;
+  --seq-4: #3987e5;
+  --seq-5: #6da7ec;
+  --seq-6: #9ec5f4;
+
+  --ring: #f7f7f6;
+  --shadow-color: 0 0% 0%;
+}
+
+/* =====================================================================
+   Tailwind theme bridge — exposes tokens as utilities (bg-surface, text-ink…)
+   ===================================================================== */
+@theme inline {
+  --color-plane: var(--plane);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-wash: var(--brand-wash);
+  --color-good: var(--good);
+  --color-good-wash: var(--good-wash);
+  --color-warning: var(--warning);
+  --color-warning-wash: var(--warning-wash);
+  --color-serious: var(--serious);
+  --color-serious-wash: var(--serious-wash);
+  --color-critical: var(--critical);
+  --color-critical-wash: var(--critical-wash);
+  --color-info: var(--info);
+  --color-info-wash: var(--info-wash);
+  --color-neutral-wash: var(--neutral-wash);
+  --color-delta-up: var(--delta-up);
+  --color-delta-down: var(--delta-down);
+  --color-series-1: var(--series-1);
+  --color-series-2: var(--series-2);
+  --color-series-3: var(--series-3);
+  --color-series-4: var(--series-4);
+  --color-series-5: var(--series-5);
+  --color-series-6: var(--series-6);
+  --color-series-7: var(--series-7);
+  --color-series-8: var(--series-8);
+  --color-grid: var(--grid);
+  --color-axis: var(--axis);
+
+  --radius-card: 1rem;
+  --radius-lg: var(--radius);
+
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+
+  --shadow-xs: 0 1px 2px hsl(var(--shadow-color) / 0.05);
+  --shadow-sm: 0 1px 3px hsl(var(--shadow-color) / 0.07),
+    0 1px 2px hsl(var(--shadow-color) / 0.04);
+  --shadow-md: 0 4px 14px hsl(var(--shadow-color) / 0.08),
+    0 1px 3px hsl(var(--shadow-color) / 0.05);
+  --shadow-lg: 0 12px 34px hsl(var(--shadow-color) / 0.12),
+    0 3px 10px hsl(var(--shadow-color) / 0.07);
+  --shadow-xl: 0 24px 60px hsl(var(--shadow-color) / 0.18),
+    0 8px 20px hsl(var(--shadow-color) / 0.1);
+}
+
+/* =====================================================================
+   Base
+   ===================================================================== */
+@layer base {
+  * {
+    border-color: var(--line);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--plane);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv02", "cv03", "cv04";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  /* Slim, unobtrusive scrollbars that match the surface */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--line-strong) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: var(--line-strong);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--ink-3);
+    background-clip: content-box;
+  }
+
+  /* Numbers that must line up vertically */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer utilities {
+  .hairline {
+    border: 1px solid var(--line);
+  }
+
+  /* Sticky table headers sit on the surface so rows scroll under them */
+  .sticky-head th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--surface-2);
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+
+  .shimmer {
+    background-image: linear-gradient(
+      90deg,
+      var(--surface-3) 0%,
+      var(--surface-2) 40%,
+      var(--surface-3) 80%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+  }
+
+  /* Refetching charts hold their previous render instead of flashing a skeleton */
+  .is-refetching {
+    opacity: 0.55;
+    transition: opacity 160ms ease-out;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Recharts overrides — keep chrome recessive and solid (never dashed) */
+.recharts-cartesian-grid line {
+  stroke: var(--grid);
+  stroke-width: 1;
+}
+.recharts-cartesian-axis-line,
+.recharts-cartesian-axis-tick-line {
+  stroke: var(--axis);
+}
+.recharts-surface:focus,
+.recharts-wrapper:focus {
+  outline: none;
+}
+.recharts-sector:focus,
+.recharts-rectangle:focus {
+  outline: none;
+}
+
+/* Print: drop chrome, keep the document */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+  .print-full {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+}
