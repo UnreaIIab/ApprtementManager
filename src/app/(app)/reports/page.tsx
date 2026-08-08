@@ -9,14 +9,18 @@ import {
 import { dayjs, granularityFor } from "@/lib/date-range";
 import { strings, useT } from "@/i18n";
 import { exportCsv } from "@/lib/utils";
+import { ReportPrintSheet } from "@/components/reports/print-sheet";
 import { formatDateRange, money, number, percent } from "@/lib/format";
 import {
   BOOKING_STATUS_META, TASK_STATUS_META, categoryColor, sourceColor,
 } from "@/lib/constants";
 import { useDateFilter } from "@/hooks/use-date-filter";
 import { useAnalytics } from "@/hooks/use-analytics";
-import { useBookings, useSnapshot, useTasks } from "@/data/queries";
+import {
+  useApartments, useBookings, useExpenses, useOrganization, useSnapshot, useTasks,
+} from "@/data/queries";
 import { PageHeader, FilterBar } from "@/components/layout/page-header";
+import { Select } from "@/components/ui/field";
 import { Tabs } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
@@ -49,19 +53,29 @@ export default function ReportsPage() {
   const t = useT();
   const { range, label } = useDateFilter();
   const { data: snapshot } = useSnapshot();
+  /* null = the whole portfolio. */
+  const [scopeId, setScopeId] = useState<string | null>(null);
+  const { data: apartments } = useApartments();
   const { data: bookings } = useBookings();
+  const { data: expenses } = useExpenses();
   const { data: tasks } = useTasks();
+  const organization = useOrganization();
   const {
     input, kpis, previousKpis, lastYearKpis, trend, apartmentPerformance, delta,
-  } = useAnalytics();
+  } = useAnalytics(scopeId);
 
   const [report, setReport] = useState<Report>("financial");
 
   // Stable identities so the report memos below only recompute on real change.
   const guests = useMemo(() => snapshot?.guests ?? [], [snapshot]);
-  const rawBookings = useMemo(() => snapshot?.bookings ?? [], [snapshot]);
-  const rawExpenses = useMemo(() => snapshot?.expenses ?? [], [snapshot]);
-  const rawPayments = useMemo(() => snapshot?.payments ?? [], [snapshot]);
+  const rawBookings = input.bookings;
+  const rawExpenses = input.expenses;
+  const rawPayments = input.payments;
+
+  const scopedApartment = useMemo(
+    () => apartments.find((a) => a.id === scopeId) ?? null,
+    [apartments, scopeId],
+  );
 
   /* --- Derived report data ------------------------------------------ */
 
@@ -93,8 +107,25 @@ export default function ReportsPage() {
   }, [input, range]);
 
   const inRangeBookings = useMemo(
-    () => bookings.filter((b) => b.check_in >= range.start && b.check_in <= range.end),
-    [bookings, range],
+    () =>
+      bookings.filter(
+        (b) =>
+          b.check_in >= range.start &&
+          b.check_in <= range.end &&
+          (!scopeId || b.apartment_id === scopeId),
+      ),
+    [bookings, range, scopeId],
+  );
+
+  const inRangeExpenses = useMemo(
+    () =>
+      expenses.filter(
+        (e) =>
+          e.expense_date >= range.start &&
+          e.expense_date <= range.end &&
+          (!scopeId || e.apartment_id === scopeId),
+      ),
+    [expenses, range, scopeId],
   );
 
   const cancellations = useMemo(
@@ -354,6 +385,17 @@ export default function ReportsPage() {
 
   return (
     <>
+      <ReportPrintSheet
+        organization={organization}
+        range={range}
+        rangeLabel={label}
+        kpis={kpis}
+        bookings={inRangeBookings}
+        expenses={inRangeExpenses}
+        apartment={scopedApartment}
+      />
+
+      <div className="no-print">
       <PageHeader
         title={t.reports.title}
         description={
@@ -382,11 +424,24 @@ export default function ReportsPage() {
 
       <FilterBar>
         <Tabs
-          className="w-full border-0"
+          className="min-w-0 flex-1 border-0"
           value={report}
           onChange={setReport}
           tabs={REPORTS}
         />
+        <Select
+          aria-label={t.printReport.scope}
+          className="w-full sm:w-56"
+          value={scopeId ?? ""}
+          onChange={(event) => setScopeId(event.target.value || null)}
+        >
+          <option value="">{t.printReport.allApartments}</option>
+          {apartments.map((apartment) => (
+            <option key={apartment.id} value={apartment.id}>
+              {apartment.name}
+            </option>
+          ))}
+        </Select>
       </FilterBar>
 
       {/* --- Financial ------------------------------------------------ */}
@@ -1103,6 +1158,7 @@ export default function ReportsPage() {
           />
         </div>
       ) : null}
+      </div>
     </>
   );
 }

@@ -323,7 +323,20 @@
   outline: none;
 }
 
-/* Print: drop chrome, keep the document */
+/* ------------------------------------------------------------------ */
+/* Print                                                               */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The accounting sheet exists only on paper. It is built as its own document
+ * rather than as a stylesheet over the screen: the screen report is exploratory
+ * — cards, charts, things to click — and squeezing that into A4 is what made the
+ * old export run to several sparse pages.
+ */
+.print-sheet {
+  display: none;
+}
+
 @media print {
   .no-print {
     display: none !important;
@@ -335,5 +348,131 @@
     box-shadow: none !important;
     border: none !important;
     padding: 0 !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 12mm 10mm;
+  }
+
+  .print-sheet {
+    display: block;
+    /* Black on white, and a serif because this is a statement, not a screen. */
+    color: #000;
+    background: #fff;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 8.2pt;
+    line-height: 1.32;
+  }
+
+  .print-sheet * {
+    /* One tone throughout: colour costs ink and does not survive a photocopier. */
+    color: #000 !important;
+    background: transparent !important;
+  }
+
+  .ps-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12mm;
+    border-bottom: 1.2pt solid #000;
+    padding-bottom: 2mm;
+    margin-bottom: 3mm;
+  }
+  .ps-head-right {
+    text-align: right;
+  }
+  .ps-company {
+    font-size: 12pt;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+  .ps-title {
+    font-size: 10pt;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+  .ps-meta {
+    font-size: 7.4pt;
+  }
+
+  .ps-section {
+    font-size: 8pt;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    border-bottom: 0.6pt solid #000;
+    padding-bottom: 0.8mm;
+    margin: 4mm 0 1.5mm;
+    /* Never leave a heading stranded at the foot of a page. */
+    break-after: avoid;
+  }
+
+  /* The two summary columns read down, the way a statement is read. */
+  .ps-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 8mm;
+  }
+
+  .ps-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .ps-table td,
+  .ps-table th {
+    padding: 0.7mm 1.2mm;
+    vertical-align: top;
+  }
+  .ps-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .ps-summary .ps-table td {
+    border-bottom: 0.4pt dotted #666;
+  }
+  .ps-strong td {
+    font-weight: 700;
+    border-bottom: 0.8pt solid #000 !important;
+  }
+
+  .ps-detail th {
+    text-align: left;
+    font-weight: 700;
+    font-size: 7.4pt;
+    border-bottom: 0.8pt solid #000;
+    white-space: nowrap;
+  }
+  .ps-detail td {
+    border-bottom: 0.3pt solid #bbb;
+  }
+  .ps-detail tfoot td {
+    font-weight: 700;
+    border-top: 0.8pt solid #000;
+    border-bottom: none;
+  }
+  /* A row split across a page break is unreadable; a repeated header is not. */
+  .ps-detail thead {
+    display: table-header-group;
+  }
+  .ps-detail tr {
+    break-inside: avoid;
+  }
+
+  .ps-empty {
+    font-style: italic;
+    padding: 1.5mm 0;
+  }
+
+  .ps-foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 8mm;
+    margin-top: 4mm;
+    padding-top: 1.5mm;
+    border-top: 0.6pt solid #000;
+    font-size: 6.8pt;
   }
 }
