@@ -11,6 +11,7 @@ import {
   type Granularity,
 } from "@/lib/date-range";
 import { BOOKING_SOURCE_LABELS, EXPENSE_CATEGORY_LABELS } from "@/lib/constants";
+import { strings } from "@/i18n";
 import type {
   Apartment,
   ApartmentPerformance,
@@ -326,7 +327,7 @@ export function capSlices(slices: BreakdownSlice[], limit: number): BreakdownSli
   const tail = slices.slice(limit - 1);
   const value = tail.reduce((acc, slice) => acc + slice.value, 0);
   const share = tail.reduce((acc, slice) => acc + slice.share, 0);
-  return [...head, { key: "__other", label: "Other", value, share }];
+  return [...head, { key: "__other", label: strings().category.other, value, share }];
 }
 
 /* ------------------------------------------------------------------ */

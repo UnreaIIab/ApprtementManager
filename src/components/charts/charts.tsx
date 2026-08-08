@@ -123,12 +123,16 @@ export function TrendChart<T extends object>({
   stacked?: boolean;
 }) {
   const gradientId = useId().replace(/:/g, "");
-  // Dense series get fewer ticks so labels never collide.
-  const tickInterval = data.length > 24 ? Math.floor(data.length / 8) : 0;
 
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <ComposedChart data={data} margin={{ top: 8, right: 8, bottom: 4, left: 4 }}>
+      {/*
+        The right margin holds the last x-axis label, which is centred on the
+        final tick and so hangs half its own width past the plot. 8px was enough
+        for "Aug 26" and not for "26 août" — French dates are longer, and the
+        label was being cut to "26 ao". Sized for the longer case.
+      */}
+      <ComposedChart data={data} margin={{ top: 8, right: 28, bottom: 4, left: 4 }}>
         <defs>
           {series.map((entry, index) => (
             <linearGradient
@@ -143,13 +147,28 @@ export function TrendChart<T extends object>({
         </defs>
 
         <CartesianGrid stroke={GRID_STROKE} vertical={false} />
+        {/*
+          Thinning is left to the axis, which is the only party that knows how
+          wide the labels actually rendered.
+
+          The previous rule picked an interval from the number of points alone —
+          and returned 0, meaning "draw every tick", for anything up to 24. A
+          twelve-month range is 12 points, so all twelve were forced out at
+          whatever width was going: "Jan 2026Feb 2026Mar 2026…". Point count was
+          never the variable that mattered; label width against card width was,
+          and that changes with the language, the period and the breakpoint.
+
+          `preserveStartEnd` with a real `minTickGap` drops as many intermediate
+          ticks as it takes to hold that gap, while always keeping the first and
+          last so the range stays readable.
+        */}
         <XAxis
           dataKey={xKey}
           tick={AXIS_TICK}
           tickLine={false}
           axisLine={{ stroke: "var(--axis)" }}
-          interval={tickInterval}
-          minTickGap={8}
+          interval="preserveStartEnd"
+          minTickGap={24}
           tickMargin={8}
         />
         <YAxis

@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { DeltaBadge } from "@/components/ui/badge";
 import { Sparkline } from "@/components/charts/charts";
 import { Skeleton } from "@/components/ui/feedback";
+import { useT } from "@/i18n";
 
 /**
  * KPI tile.
@@ -19,7 +20,7 @@ export function KpiCard({
   label,
   value,
   delta,
-  deltaLabel = "vs previous period",
+  deltaLabel,
   invertDelta,
   hint,
   icon,
@@ -43,6 +44,7 @@ export function KpiCard({
   loading?: boolean;
   className?: string;
 }) {
+  const t = useT();
   const body = (
     <>
       <div className="flex items-start justify-between gap-3">
@@ -64,7 +66,16 @@ export function KpiCard({
         ) : delta !== undefined ? (
           <>
             <DeltaBadge value={delta} invert={invertDelta} />
-            <span className="truncate text-[11.5px] text-ink-3">{deltaLabel}</span>
+            {/*
+              The caption is a gloss on the badge, not information of its own,
+              and French runs longer than English — at two tiles across on a
+              phone it truncated to "vs période p…", which reads as breakage.
+              It is dropped there rather than clipped; the badge still carries
+              direction and size.
+            */}
+            <span className="hidden truncate text-[11.5px] text-ink-3 sm:inline">
+              {deltaLabel ?? t.dashboard.vsPreviousPeriod}
+            </span>
           </>
         ) : hint ? (
           <span className="truncate text-[11.5px] text-ink-3">{hint}</span>

@@ -72,8 +72,8 @@ export function ChartCard({
             value={view}
             onChange={setView}
             options={[
-              { value: "chart", label: "Chart", icon: <BarChart3 /> },
-              { value: "table", label: "Table", icon: <Table2 /> },
+              { value: "chart", label: t.ui.chartView, icon: <BarChart3 /> },
+              { value: "table", label: t.ui.tableView, icon: <Table2 /> },
             ]}
           />
         </div>

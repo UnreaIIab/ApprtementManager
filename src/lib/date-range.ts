@@ -175,10 +175,18 @@ export function bucketKey(date: ISODate, granularity: Granularity): string {
   return granularity === "month" ? date.slice(0, 7) : date;
 }
 
+/**
+ * The x-axis label for one bucket.
+ *
+ * The pattern comes from the dictionary because day and month order differently
+ * per language: French reads "3 août", English "Aug 3". Hardcoding "MMM D" gave
+ * French charts an axis of "août 3", which is not a date anyone writes.
+ */
 export function bucketLabel(key: string, granularity: Granularity): string {
+  const f = strings().format;
   return granularity === "month"
-    ? dayjs(`${key}-01`).format("MMM YYYY")
-    : dayjs(key).format("MMM D");
+    ? dayjs(`${key}-01`).format(f.monthAxis)
+    : dayjs(key).format(f.dateShort);
 }
 
 /** Inclusive-start, exclusive-end overlap — the rule a stay actually follows. */

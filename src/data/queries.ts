@@ -10,6 +10,7 @@ import {
 import { toast } from "sonner";
 import { useWorkspace, workspaceKeys } from "@/hooks/use-workspace";
 import { configureFormatting } from "@/lib/format";
+import { strings } from "@/i18n";
 import {
   joinBookings,
   joinExpenses,
@@ -192,7 +193,7 @@ function useAppMutation<TData, TVariables>(
     },
     onError: (...args) => {
       const [error] = args;
-      toast.error(messages.error ?? "Something went wrong", { description: error.message });
+      toast.error(messages.error ?? strings().toast.somethingWentWrong, { description: error.message });
       options?.onError?.(...args);
     },
   });
@@ -201,161 +202,161 @@ function useAppMutation<TData, TVariables>(
 export function useCreateBooking() {
   return useAppMutation<Booking, NewBooking>(
     (input) => repository.createBooking(input),
-    { success: (booking) => `Booking ${booking.reference} created`, error: "Could not create booking" },
+    { success: (booking) => strings().toast.bookingCreated(booking.reference), error: strings().toast.errCreateBooking },
   );
 }
 
 export function useUpdateBooking() {
   return useAppMutation<Booking, { id: string; patch: Partial<Booking>; silent?: boolean }>(
     ({ id, patch }) => repository.updateBooking(id, patch),
-    { success: "Booking updated", error: "Could not update booking" },
+    { success: strings().toast.bookingUpdated, error: strings().toast.errUpdateBooking },
   );
 }
 
 export function useDeleteBooking() {
   return useAppMutation<void, string>(
     (id) => repository.deleteBooking(id),
-    { success: "Booking deleted", error: "Could not delete booking" },
+    { success: strings().toast.bookingDeleted, error: strings().toast.errDeleteBooking },
   );
 }
 
 export function useCreateGuest() {
   return useAppMutation<Guest, NewGuest>(
     (input) => repository.createGuest(input),
-    { success: "Guest added", error: "Could not add guest" },
+    { success: strings().toast.guestAdded, error: strings().toast.errAddGuest },
   );
 }
 
 export function useUpdateGuest() {
   return useAppMutation<Guest, { id: string; patch: Partial<Guest> }>(
     ({ id, patch }) => repository.updateGuest(id, patch),
-    { success: "Guest updated", error: "Could not update guest" },
+    { success: strings().toast.guestUpdated, error: strings().toast.errUpdateGuest },
   );
 }
 
 export function useDeleteGuest() {
   return useAppMutation<void, string>(
     (id) => repository.deleteGuest(id),
-    { success: "Guest deleted", error: "Could not delete guest" },
+    { success: strings().toast.guestDeleted, error: strings().toast.errDeleteGuest },
   );
 }
 
 export function useCreateApartment() {
   return useAppMutation<Apartment, NewApartment>(
     (input) => repository.createApartment(input),
-    { success: "Apartment added", error: "Could not add apartment" },
+    { success: strings().toast.apartmentAdded, error: strings().toast.errAddApartment },
   );
 }
 
 export function useUpdateApartment() {
   return useAppMutation<Apartment, { id: string; patch: Partial<Apartment> }>(
     ({ id, patch }) => repository.updateApartment(id, patch),
-    { success: "Apartment updated", error: "Could not update apartment" },
+    { success: strings().toast.apartmentUpdated, error: strings().toast.errUpdateApartment },
   );
 }
 
 export function useDeleteApartment() {
   return useAppMutation<void, string>(
     (id) => repository.deleteApartment(id),
-    { success: "Apartment removed", error: "Could not remove apartment" },
+    { success: strings().toast.apartmentRemoved, error: strings().toast.errRemoveApartment },
   );
 }
 
 export function useCreateExpense() {
   return useAppMutation<Expense, NewExpense>(
     (input) => repository.createExpense(input),
-    { success: "Expense recorded", error: "Could not record expense" },
+    { success: strings().toast.expenseRecorded, error: strings().toast.errRecordExpense },
   );
 }
 
 export function useUpdateExpense() {
   return useAppMutation<Expense, { id: string; patch: Partial<Expense> }>(
     ({ id, patch }) => repository.updateExpense(id, patch),
-    { success: "Expense updated", error: "Could not update expense" },
+    { success: strings().toast.expenseUpdated, error: strings().toast.errUpdateExpense },
   );
 }
 
 export function useDeleteExpense() {
   return useAppMutation<void, string>(
     (id) => repository.deleteExpense(id),
-    { success: "Expense deleted", error: "Could not delete expense" },
+    { success: strings().toast.expenseDeleted, error: strings().toast.errDeleteExpense },
   );
 }
 
 export function useCreatePayment() {
   return useAppMutation<Payment, NewPayment>(
     (input) => repository.createPayment(input),
-    { success: "Payment recorded", error: "Could not record payment" },
+    { success: strings().toast.paymentRecorded, error: strings().toast.errRecordPayment },
   );
 }
 
 export function useDeletePayment() {
   return useAppMutation<void, string>(
     (id) => repository.deletePayment(id),
-    { success: "Payment removed", error: "Could not remove payment" },
+    { success: strings().toast.paymentRemoved, error: strings().toast.errRemovePayment },
   );
 }
 
 export function useCreateInvoice() {
   return useAppMutation<Invoice, { invoice: NewInvoice; items: NewInvoiceItem[] }>(
     ({ invoice, items }) => repository.createInvoice(invoice, items),
-    { success: (invoice) => `Invoice ${invoice.number} created`, error: "Could not create invoice" },
+    { success: (invoice) => strings().toast.invoiceCreatedRef(invoice.number), error: strings().toast.errCreateInvoice },
   );
 }
 
 export function useUpdateInvoice() {
   return useAppMutation<Invoice, { id: string; patch: Partial<Invoice> }>(
     ({ id, patch }) => repository.updateInvoice(id, patch),
-    { success: "Invoice updated", error: "Could not update invoice" },
+    { success: strings().toast.invoiceUpdated, error: strings().toast.errUpdateInvoice },
   );
 }
 
 export function useDeleteInvoice() {
   return useAppMutation<void, string>(
     (id) => repository.deleteInvoice(id),
-    { success: "Invoice deleted", error: "Could not delete invoice" },
+    { success: strings().toast.invoiceDeleted, error: strings().toast.errDeleteInvoice },
   );
 }
 
 export function useCreateTask() {
   return useAppMutation<Task, NewTask>(
     (input) => repository.createTask(input),
-    { success: "Task created", error: "Could not create task" },
+    { success: strings().toast.taskCreated, error: strings().toast.errCreateTask },
   );
 }
 
 export function useUpdateTask() {
   return useAppMutation<Task, { id: string; patch: Partial<Task> }>(
     ({ id, patch }) => repository.updateTask(id, patch),
-    { success: "Task updated", error: "Could not update task" },
+    { success: strings().toast.taskUpdated, error: strings().toast.errUpdateTask },
   );
 }
 
 export function useCreateBlock() {
   return useAppMutation<CalendarBlock, NewBlock>(
     (input) => repository.createBlock(input),
-    { success: "Dates blocked", error: "Could not block those dates" },
+    { success: strings().toast.datesBlocked, error: strings().toast.errBlockDates },
   );
 }
 
 export function useDeleteBlock() {
   return useAppMutation<void, string>(
     (id) => repository.deleteBlock(id),
-    { success: "Block removed", error: "Could not remove block" },
+    { success: strings().toast.blockRemoved, error: strings().toast.errRemoveBlock },
   );
 }
 
 export function useAddNote() {
   return useAppMutation<unknown, { entity_type: string; entity_id: string; body: string }>(
     (input) => repository.addNote(input),
-    { success: "Note added", error: "Could not add note" },
+    { success: strings().toast.noteAdded, error: strings().toast.errAddNote },
   );
 }
 
 export function useUpdateOrganization() {
   return useAppMutation<Organization, Partial<Organization>>(
     (patch) => repository.updateOrganization(patch),
-    { success: "Settings saved", error: "Could not save settings" },
+    { success: strings().toast.settingsSaved, error: strings().toast.errSaveSettings },
   );
 }
 
@@ -395,7 +396,7 @@ export function useCreateWorkspace() {
       toast.success("Company created");
     },
     onError: (error: Error) =>
-      toast.error("Could not create the company", { description: error.message }),
+      toast.error(strings().ui.couldNotCreateCompany, { description: error.message }),
   });
 }
 
@@ -409,6 +410,6 @@ export function useLeaveWorkspace() {
       toast.success("You have left the company");
     },
     onError: (error: Error) =>
-      toast.error("Could not leave the company", { description: error.message }),
+      toast.error(strings().ui.couldNotLeaveCompany, { description: error.message }),
   });
 }
