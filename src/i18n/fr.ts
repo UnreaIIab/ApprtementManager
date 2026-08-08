@@ -871,6 +871,8 @@ export const fr = {
   },
 
   reports: {
+    exportCsv: "Exporter CSV",
+    savePdf: "Enregistrer en PDF",
     title: "Rapports",
     tabFinancial: "Financier",
     tabOccupancy: "Occupation",

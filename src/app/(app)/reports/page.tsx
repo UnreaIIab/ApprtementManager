@@ -1,15 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Download, FileSpreadsheet, Printer, Sparkles, Wrench } from "lucide-react";
+import { Download, FileSpreadsheet, Sparkles, Wrench } from "lucide-react";
 import {
   bookingsBySource, capSlices, computeCashFlow, computeOccupancyByDay,
   computeSeasonality, expensesByCategory, revenueBySource,
 } from "@/data/analytics";
 import { dayjs, granularityFor } from "@/lib/date-range";
 import { strings, useT } from "@/i18n";
-import { exportCsv } from "@/lib/utils";
 import { ReportPrintSheet } from "@/components/reports/print-sheet";
+import { downloadReportCsv } from "@/lib/report-csv";
 import { formatDateRange, money, number, percent } from "@/lib/format";
 import {
   BOOKING_STATUS_META, TASK_STATUS_META, categoryColor, sourceColor,
@@ -192,109 +192,24 @@ export default function ReportsPage() {
 
   /* --- Export ------------------------------------------------------- */
 
+  /*
+   * Both exports produce the same document from the same inputs, so a CSV and a
+   * PDF of one period can never disagree. Previously the CSV dumped whichever
+   * tab happened to be open, which meant "Export CSV" did seven different
+   * things depending on where you clicked.
+   */
   const exportCurrent = () => {
-    const stamp = `${range.start}-to-${range.end}`;
-    switch (report) {
-      case "financial":
-        return exportCsv(
-          `financial-report-${stamp}.csv`,
-          trend.map((point) => ({
-            period: point.label,
-            revenue: (point.revenue / 100).toFixed(2),
-            expenses: (point.expenses / 100).toFixed(2),
-            profit: (point.profit / 100).toFixed(2),
-            margin: point.revenue ? ((point.profit / point.revenue) * 100).toFixed(1) : "0",
-            nights_sold: point.nightsSold,
-            occupancy: (point.occupancy * 100).toFixed(1),
-          })),
-        );
-      case "occupancy":
-        return exportCsv(
-          `occupancy-report-${stamp}.csv`,
-          occupancyCells.map((cell) => ({
-            date: cell.date,
-            nights_sold: cell.nightsSold,
-            nights_available: cell.nightsAvailable,
-            occupancy: (cell.occupancy * 100).toFixed(1),
-          })),
-        );
-      case "apartments":
-        return exportCsv(
-          `apartment-performance-${stamp}.csv`,
-          apartmentPerformance.map((row) => ({
-            code: row.apartment.code,
-            apartment: row.apartment.name,
-            revenue: (row.revenue / 100).toFixed(2),
-            expenses: (row.expenses / 100).toFixed(2),
-            profit: (row.profit / 100).toFixed(2),
-            margin: (row.margin * 100).toFixed(1),
-            occupancy: (row.occupancy * 100).toFixed(1),
-            adr: (row.adr / 100).toFixed(2),
-            revpar: (row.revpar / 100).toFixed(2),
-            bookings: row.bookings,
-            avg_stay: row.avgStay.toFixed(1),
-            cancellation_rate: (row.cancellationRate * 100).toFixed(1),
-          })),
-        );
-      case "sources":
-        return exportCsv(
-          `booking-sources-${stamp}.csv`,
-          sourceRevenue.map((slice) => ({
-            source: slice.label,
-            revenue: (slice.value / 100).toFixed(2),
-            share: (slice.share * 100).toFixed(1),
-            bookings: sourceCounts.find((entry) => entry.key === slice.key)?.value ?? 0,
-          })),
-        );
-      case "guests":
-        return exportCsv(
-          `guest-statistics-${stamp}.csv`,
-          guestStats.topGuests.map((entry) => ({
-            guest: entry.guest ? `${entry.guest.first_name} ${entry.guest.last_name}` : "",
-            nationality: entry.guest?.nationality ?? "",
-            stays: entry.stays,
-            nights: entry.nights,
-            spend: (entry.spend / 100).toFixed(2),
-          })),
-        );
-      case "seasonality":
-        return exportCsv(
-          `seasonality-${stamp}.csv`,
-          seasonality.map((point) => ({
-            month: point.label,
-            revenue: (point.revenue / 100).toFixed(2),
-            occupancy: (point.occupancy * 100).toFixed(1),
-            adr: (point.adr / 100).toFixed(2),
-          })),
-        );
-      case "cancellations":
-        return exportCsv(
-          `cancellations-${stamp}.csv`,
-          cancellations.map((booking) => ({
-            reference: booking.reference,
-            guest: `${booking.guest.first_name} ${booking.guest.last_name}`,
-            apartment: booking.apartment.name,
-            check_in: booking.check_in,
-            nights: booking.nights,
-            value_lost: (booking.total / 100).toFixed(2),
-            reason: booking.cancellation_reason ?? "",
-          })),
-        );
-      case "housekeeping":
-      default:
-        return exportCsv(
-          `housekeeping-${stamp}.csv`,
-          housekeeping.all.map((task) => ({
-            type: task.type,
-            title: task.title,
-            apartment: task.apartment?.name ?? "",
-            due_date: task.due_date ?? "",
-            status: task.status,
-            assignee: task.assignee ?? "",
-            cost: (task.cost / 100).toFixed(2),
-          })),
-        );
-    }
+    const scope = scopedApartment ? `-${scopedApartment.code}` : "";
+    downloadReportCsv({
+      filename: `rapport${scope}-${range.start}-${range.end}.csv`,
+      organization,
+      range,
+      rangeLabel: label,
+      kpis,
+      bookings: inRangeBookings,
+      expenses: inRangeExpenses,
+      apartment: scopedApartment,
+    });
   };
 
   const apartmentColumns: Column<ApartmentPerformance>[] = [
@@ -405,18 +320,19 @@ export default function ReportsPage() {
         }
         actions={
           <>
-            <Button variant="outline" icon={<Printer className="size-4" />} onClick={() => window.print()}>
-              Print
-            </Button>
-            <Button variant="outline" icon={<FileSpreadsheet className="size-4" />} onClick={exportCurrent}>
-              Export CSV
+            <Button
+              variant="outline"
+              icon={<FileSpreadsheet className="size-4" />}
+              onClick={exportCurrent}
+            >
+              {t.reports.exportCsv}
             </Button>
             <Button
               variant="primary"
               icon={<Download className="size-4" />}
               onClick={() => window.print()}
             >
-              Save as PDF
+              {t.reports.savePdf}
             </Button>
           </>
         }

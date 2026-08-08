@@ -857,6 +857,8 @@ export const en: Dictionary = {
   },
 
   reports: {
+    exportCsv: "Export CSV",
+    savePdf: "Save as PDF",
     title: "Reports",
     tabFinancial: "Financial",
     tabOccupancy: "Occupancy",
