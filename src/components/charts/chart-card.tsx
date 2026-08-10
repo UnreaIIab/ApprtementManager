@@ -68,7 +68,7 @@ export function ChartCard({
           {action}
           <Segmented
             size="sm"
-            ariaLabel={`${title} view`}
+            ariaLabel={title}
             value={view}
             onChange={setView}
             options={[

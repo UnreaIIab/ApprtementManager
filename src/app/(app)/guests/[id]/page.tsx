@@ -97,7 +97,7 @@ export default function GuestProfilePage({ params }: { params: Promise<{ id: str
   const bookingColumns: Column<BookingWithRelations>[] = [
     {
       key: "reference",
-      header: "Booking",
+      header: t.bookings.colBooking,
       sortValue: (row) => row.reference,
       cell: (row) => (
         <Link href={`/bookings?booking=${row.id}`} className="font-medium text-ink hover:underline">
@@ -107,13 +107,13 @@ export default function GuestProfilePage({ params }: { params: Promise<{ id: str
     },
     {
       key: "apartment",
-      header: "Apartment",
+      header: t.change.apartment,
       sortValue: (row) => row.apartment.name,
       cell: (row) => <span className="text-ink">{row.apartment.name}</span>,
     },
     {
       key: "stay",
-      header: "Stay",
+      header: t.bookings.colStay,
       sortValue: (row) => row.check_in,
       cell: (row) => (
         <span className="whitespace-nowrap text-ink tnum">
@@ -123,27 +123,27 @@ export default function GuestProfilePage({ params }: { params: Promise<{ id: str
     },
     {
       key: "nights",
-      header: "Nights",
+      header: t.printReport.colNights,
       align: "right",
       sortValue: (row) => row.nights,
       cell: (row) => <span className="text-ink-2 tnum">{row.nights}</span>,
     },
     {
       key: "status",
-      header: "Status",
+      header: t.common.status,
       sortValue: (row) => row.status,
       cell: (row) => <StatusBadge size="sm" meta={BOOKING_STATUS_META[row.status]} />,
     },
     {
       key: "total",
-      header: "Total",
+      header: t.common.total,
       align: "right",
       sortValue: (row) => row.total,
       cell: (row) => <span className="font-medium text-ink tnum">{money(row.total)}</span>,
     },
     {
       key: "balance",
-      header: "Balance",
+      header: t.bookings.colBalance,
       align: "right",
       sortValue: (row) => row.balance,
       cell: (row) => (
@@ -203,7 +203,7 @@ export default function GuestProfilePage({ params }: { params: Promise<{ id: str
               icon={<Plus className="size-4" />}
               onClick={() => router.push("/bookings?new=1")}
             >
-              New booking
+              {t.calendar.newBooking}
             </Button>
           </>
         }
@@ -261,10 +261,10 @@ export default function GuestProfilePage({ params }: { params: Promise<{ id: str
         </Card>
 
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
-          <KpiCard label={t.guests.totalStays} value={number(summary.stays)} hint="completed and upcoming" />
+          <KpiCard label={t.guests.totalStays} value={number(summary.stays)} hint={t.guests.completedAndUpcoming} />
           <KpiCard label={t.apartments.nightsBooked} value={number(summary.nights)} />
           <KpiCard label={t.guests.lifetimeValue} value={money(summary.spend, { cents: false })} />
-          <KpiCard label={t.invoices.outstanding} value={money(summary.balance, { cents: false })} hint="across all bookings" />
+          <KpiCard label={t.invoices.outstanding} value={money(summary.balance, { cents: false })} hint={t.guests.acrossAllBookings} />
           <KpiCard label={t.guests.cancellations} value={number(summary.cancellations)} />
           <KpiCard
             label={t.guests.firstStay}

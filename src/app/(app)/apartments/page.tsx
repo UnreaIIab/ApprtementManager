@@ -149,7 +149,7 @@ function ApartmentsView() {
   const columns: Column<Row>[] = [
     {
       key: "name",
-      header: "Apartment",
+      header: t.change.apartment,
       sortValue: (row) => row.apartment.name,
       cell: (row) => (
         <span className="flex items-center gap-3">
@@ -176,7 +176,7 @@ function ApartmentsView() {
     },
     {
       key: "layout",
-      header: "Layout",
+      header: t.apartments.layout,
       secondary: true,
       sortValue: (row) => row.apartment.bedrooms,
       cell: (row) => (
@@ -188,7 +188,7 @@ function ApartmentsView() {
     },
     {
       key: "status",
-      header: "Status",
+      header: t.common.status,
       sortValue: (row) => row.apartment.status,
       cell: (row) => (
         <span className="block">
@@ -203,7 +203,7 @@ function ApartmentsView() {
     },
     {
       key: "rate",
-      header: "Rate",
+      header: t.apartments.rate,
       align: "right",
       sortValue: (row) => row.apartment.nightly_rate,
       cell: (row) => (
@@ -212,7 +212,7 @@ function ApartmentsView() {
     },
     {
       key: "occupancy",
-      header: "Occupancy",
+      header: t.dashboard.occupancy,
       align: "right",
       sortValue: (row) => row.performance?.occupancy ?? 0,
       cell: (row) => (
@@ -224,7 +224,7 @@ function ApartmentsView() {
     },
     {
       key: "revenue",
-      header: "Revenue",
+      header: t.dashboard.revenue,
       align: "right",
       sortValue: (row) => row.performance?.revenue ?? 0,
       cell: (row) => (
@@ -235,7 +235,7 @@ function ApartmentsView() {
     },
     {
       key: "profit",
-      header: "Profit",
+      header: t.dashboard.profit,
       align: "right",
       secondary: true,
       sortValue: (row) => row.performance?.profit ?? 0,
@@ -275,7 +275,7 @@ function ApartmentsView() {
                 },
               },
               {
-                label: "Remove",
+                label: t.common.remove,
                 icon: <Trash2 />,
                 destructive: true,
                 separatorBefore: true,
@@ -292,11 +292,11 @@ function ApartmentsView() {
     <>
       <PageHeader
         title={t.apartments.title}
-        description={`${apartments.length} units · performance for ${label.toLowerCase()}`}
+        description={t.apartments.unitsPerformance(apartments.length, label.toLowerCase())}
         actions={
           <>
             <Button variant="outline" icon={<Download className="size-4" />} onClick={exportRows}>
-              Export
+              {t.common.export}
             </Button>
             <Button
               variant="primary"
@@ -353,7 +353,7 @@ function ApartmentsView() {
 
         {statusFilter !== "all" ? (
           <Button size="sm" variant="ghost" onClick={() => setStatusFilter("all")}>
-            Clear status
+            {t.apartments.clearStatus}
           </Button>
         ) : null}
 
@@ -464,7 +464,7 @@ function ApartmentCard({
             <span className="block text-[15px] font-semibold text-ink tnum">
               {money(apartment.nightly_rate, { cents: false })}
             </span>
-            <span className="block text-[11px] text-ink-3">per night</span>
+            <span className="block text-[11px] text-ink-3">{t.listing.perNight}</span>
           </p>
         </div>
 

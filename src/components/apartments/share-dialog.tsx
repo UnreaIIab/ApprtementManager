@@ -84,7 +84,7 @@ export function ShareDialog({
         open={open}
         onClose={onClose}
         title={t.apartments.shareThisApartment}
-        description="Send a client a link showing the photos, details and location. No login needed on their side."
+        description={t.apartments.shareHint}
         size="md"
         footer={
           <Button variant="ghost" onClick={onClose}>
@@ -137,7 +137,7 @@ export function ShareDialog({
                   apartment.is_public ? "hover:opacity-90" : "pointer-events-none",
                 )}
               >
-                Send on WhatsApp
+                {t.apartments.sendWhatsApp}
               </a>
 
               <a
@@ -163,15 +163,13 @@ export function ShareDialog({
                 onClick={() => void rotate()}
                 icon={<RefreshCw className="size-4" />}
               >
-                New link
+                {t.apartments.newLink}
               </Button>
             </div>
           </div>
 
           <p className="rounded-xl bg-surface-2 px-3.5 py-3 text-[12.5px] leading-relaxed text-ink-2">
-            The page shows photos, description, amenities, capacity, location and the
-            nightly rate. It cannot reach your bookings, guests, invoices or any other
-            apartment — the database only ever returns those specific fields.
+            {t.apartments.sharePageScope}
           </p>
         </div>
       </Dialog>

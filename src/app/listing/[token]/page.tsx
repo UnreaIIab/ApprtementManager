@@ -142,7 +142,7 @@ export function ListingView({ listing }: { listing: PublicListing }) {
             <p className="text-[22px] font-semibold tracking-[-0.02em] text-ink">
               {money(listing.nightly_rate, listing.currency)}
             </p>
-            <p className="text-[12px] text-ink-3">per night</p>
+            <p className="text-[12px] text-ink-3">{L.perNight}</p>
           </div>
         </div>
 
@@ -242,7 +242,7 @@ export function ListingView({ listing }: { listing: PublicListing }) {
                 className="inline-flex h-11 items-center gap-2 rounded-xl border border-line px-5 text-sm font-medium text-ink hover:bg-surface-3"
               >
                 <MapPin className="size-4" aria-hidden />
-                Open in Maps
+                {L.openInMaps}
               </a>
             ) : null}
           </div>

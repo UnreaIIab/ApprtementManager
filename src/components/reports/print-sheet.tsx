@@ -2,7 +2,8 @@
 
 import { formatDate, formatDateRange, fullName, money, number, percent } from "@/lib/format";
 import { dayjs } from "@/lib/date-range";
-import { EXPENSE_CATEGORY_LABELS } from "@/lib/constants";
+import { bookingPeriodShare } from "@/data/analytics";
+import { expenseCategoryLabel } from "@/lib/constants";
 import { useT } from "@/i18n";
 import type {
   Apartment,
@@ -50,15 +51,29 @@ export function ReportPrintSheet({
    * are absent from every figure above — listing them here would make the
    * detail disagree with the summary it is supposed to substantiate.
    */
+  /*
+   * Each row reports the stay's share of *this period*, not the whole booking:
+   * a stay running from last month into this one contributes only its nights
+   * here, which is how the summary above counts it. Reporting the full booking
+   * total would make the column add up to more than the revenue it is meant to
+   * explain.
+   */
   const live = bookings
     .filter((booking) => booking.status !== "cancelled" && booking.status !== "no_show")
-    .sort((a, b) => a.check_in.localeCompare(b.check_in));
+    .map((booking) => ({ booking, share: bookingPeriodShare(booking, range) }))
+    .filter((entry) => entry.share.nights > 0)
+    .sort((a, b) => a.booking.check_in.localeCompare(b.booking.check_in));
 
   const costs = [...expenses].sort((a, b) => a.expense_date.localeCompare(b.expense_date));
 
-  const bookingTotal = live.reduce((sum, booking) => sum + booking.total, 0);
-  const bookingPaid = live.reduce((sum, booking) => sum + booking.paid, 0);
-  const bookingBalance = live.reduce((sum, booking) => sum + booking.balance, 0);
+  const bookingNights = live.reduce((sum, e) => sum + e.share.nights, 0);
+  const bookingTotal = live.reduce((sum, e) => sum + e.share.revenue, 0);
+  const bookingPaid = live.reduce((sum, e) => sum + e.booking.paid, 0);
+  const bookingBalance = live.reduce((sum, e) => sum + e.booking.balance, 0);
+  // A stay only partly inside the period is marked, and the footnote says why.
+  const anySpanning = live.some(
+    (e) => e.booking.check_in < range.start || e.booking.check_out > range.end,
+  );
   const expenseTotal = costs.reduce((sum, expense) => sum + expense.amount, 0);
 
   const company = organization?.legal_name || organization?.name || "";
@@ -112,8 +127,6 @@ export function ReportPrintSheet({
               label={t.printReport.margin}
               value={kpis.revenue ? percent(kpis.netProfit / kpis.revenue) : "—"}
             />
-            <Line label={t.printReport.collected} value={money(kpis.collected)} />
-            <Line label={t.printReport.outstanding} value={money(kpis.outstanding)} />
           </tbody>
         </table>
 
@@ -124,7 +137,6 @@ export function ReportPrintSheet({
             <Line label={t.printReport.nightsAvailable} value={number(kpis.nightsAvailable)} />
             <Line label={t.printReport.occupancy} value={percent(kpis.occupancyRate)} />
             <Line label={t.printReport.adr} value={money(kpis.adr)} />
-            <Line label={t.printReport.revpar} value={money(kpis.revpar)} />
           </tbody>
         </table>
       </div>
@@ -143,30 +155,37 @@ export function ReportPrintSheet({
               <th>{t.printReport.colCheckIn}</th>
               <th>{t.printReport.colCheckOut}</th>
               <th className="ps-num">{t.printReport.colNights}</th>
-              <th className="ps-num">{t.printReport.colTotal}</th>
+              <th className="ps-num">{t.printReport.colRevenuePeriod}</th>
               <th className="ps-num">{t.printReport.colPaid}</th>
               <th className="ps-num">{t.printReport.colBalance}</th>
             </tr>
           </thead>
           <tbody>
-            {live.map((booking) => (
-              <tr key={booking.id}>
-                <td>{booking.reference}</td>
-                <td>{booking.apartment?.name ?? "—"}</td>
-                <td>{fullName(booking.guest)}</td>
-                <td>{formatDate(booking.check_in)}</td>
-                <td>{formatDate(booking.check_out)}</td>
-                <td className="ps-num">{booking.nights}</td>
-                <td className="ps-num">{money(booking.total)}</td>
-                <td className="ps-num">{money(booking.paid)}</td>
-                <td className="ps-num">{money(booking.balance)}</td>
-              </tr>
-            ))}
+            {live.map(({ booking, share }) => {
+              const spans =
+                booking.check_in < range.start || booking.check_out > range.end;
+              return (
+                <tr key={booking.id}>
+                  <td>
+                    {booking.reference}
+                    {spans ? <span className="ps-mark">*</span> : null}
+                  </td>
+                  <td>{booking.apartment?.name ?? "—"}</td>
+                  <td>{fullName(booking.guest)}</td>
+                  <td>{formatDate(booking.check_in)}</td>
+                  <td>{formatDate(booking.check_out)}</td>
+                  <td className="ps-num">{share.nights}</td>
+                  <td className="ps-num">{money(share.revenue)}</td>
+                  <td className="ps-num">{money(booking.paid)}</td>
+                  <td className="ps-num">{money(booking.balance)}</td>
+                </tr>
+              );
+            })}
           </tbody>
           <tfoot>
             <tr>
               <td colSpan={5}>{t.printReport.total}</td>
-              <td className="ps-num">{live.reduce((s, b) => s + b.nights, 0)}</td>
+              <td className="ps-num">{bookingNights}</td>
               <td className="ps-num">{money(bookingTotal)}</td>
               <td className="ps-num">{money(bookingPaid)}</td>
               <td className="ps-num">{money(bookingBalance)}</td>
@@ -194,7 +213,7 @@ export function ReportPrintSheet({
             {costs.map((expense) => (
               <tr key={expense.id}>
                 <td>{formatDate(expense.expense_date)}</td>
-                <td>{EXPENSE_CATEGORY_LABELS[expense.category]}</td>
+                <td>{expenseCategoryLabel(expense.category)}</td>
                 <td>{expense.vendor || expense.description || "—"}</td>
                 <td>{expense.apartment?.name ?? "—"}</td>
                 <td className="ps-num">{money(expense.amount)}</td>
@@ -212,6 +231,7 @@ export function ReportPrintSheet({
 
       <footer className="ps-foot">
         <span>
+          {anySpanning ? `${t.printReport.spanningNote} ` : ""}
           {t.printReport.cancelledExcluded}
           {apartment ? ` ${t.printReport.portfolioWideExcluded}` : ""}
         </span>

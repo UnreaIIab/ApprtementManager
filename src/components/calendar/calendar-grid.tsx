@@ -16,7 +16,7 @@ import { strings } from "@/i18n";
 import { dayjs, staysOverlap, toISODate } from "@/lib/date-range";
 import { formatDate, fullName, money, nightsLabel, formatShortDate } from "@/lib/format";
 import { BOOKING_STATUS_META } from "@/lib/constants";
-import { useIsClient } from "@/hooks/use-client";
+import { useContainerWidth, useIsClient } from "@/hooks/use-client";
 import { freeGaps, occupiedIntervals, type Gap } from "@/lib/availability";
 import type { AvailabilityResult } from "@/lib/availability";
 import type {
@@ -36,6 +36,20 @@ const DAY_WIDTH: Record<CalendarScale, number> = {
 
 const ROW_HEIGHT = 62;
 const RAIL_WIDTH = 248;
+
+/**
+ * Narrowest a month column may become while still carrying "SAM." above a day
+ * number. Below this the month stops fitting and the grid scrolls again, which
+ * is the right answer on a phone — 31 legible columns do not exist there.
+ */
+const MIN_MONTH_DAY_WIDTH = 28;
+
+/**
+ * Below this the weekday drops to its initial — "S" rather than "SAM." — which
+ * is what lets a 31-column month keep fitting as the window narrows. The day
+ * number never shrinks; it is the part being counted.
+ */
+const COMPACT_WEEKDAY_BELOW = 44;
 
 /**
  * Expanded mode trades screen real estate for legibility: wider day columns and
@@ -155,7 +169,6 @@ export function CalendarGrid({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const large = size === "large";
-  const dayWidth = Math.round(DAY_WIDTH[scale] * (large ? LARGE_SCALE : 1));
   const rowHeight = large ? LARGE_ROW_HEIGHT : ROW_HEIGHT;
 
   const days = useMemo(() => {
@@ -164,6 +177,25 @@ export function CalendarGrid({
     const from = scale === "month" ? start.startOf("month") : start;
     return Array.from({ length: count }, (_, index) => from.add(index, "day"));
   }, [anchorDate, scale]);
+
+  /*
+   * A month is asked to show the whole month, so its columns are sized to the
+   * space available rather than to a constant. A fixed 46px made February and
+   * August alike overflow, and the grid then opened wherever it had been
+   * scrolled to — the 1st was off-screen before you had done anything.
+   *
+   * Week and day already fit by construction, so they keep their fixed widths;
+   * only the month has more columns than the viewport naturally holds.
+   */
+  const available = useContainerWidth(scrollRef);
+  const dayWidth = useMemo(() => {
+    const fixed = Math.round(DAY_WIDTH[scale] * (large ? LARGE_SCALE : 1));
+    if (scale !== "month" || available <= 0) return fixed;
+    const fitted = Math.floor((available - RAIL_WIDTH) / days.length);
+    return Math.max(MIN_MONTH_DAY_WIDTH, fitted);
+  }, [scale, large, available, days.length]);
+
+  const compactWeekday = scale === "month" && dayWidth < COMPACT_WEEKDAY_BELOW;
 
   const windowStart = toISODate(days[0]);
   const windowEnd = toISODate(days[days.length - 1].add(1, "day"));
@@ -364,6 +396,9 @@ export function CalendarGrid({
   useEffect(() => {
     const container = scrollRef.current;
     if (!container || focusColumn < 0) return;
+    // Nothing to bring into view when the whole window already fits, and
+    // scrolling anyway is what pushed the 1st of the month off-screen.
+    if (container.scrollWidth <= container.clientWidth + 1) return;
     container.scrollTo({ left: Math.max(0, focusColumn * dayWidth - 160), behavior: "smooth" });
   }, [focusColumn, dayWidth]);
 
@@ -429,7 +464,9 @@ export function CalendarGrid({
                         isToday ? "font-semibold text-brand" : "text-ink-3",
                       )}
                     >
-                      {day.format(scale === "day" ? "dddd" : "ddd")}
+                      {day.format(
+                        scale === "day" ? "dddd" : compactWeekday ? "dd" : "ddd",
+                      )}
                     </div>
                     {isToday && scale !== "day" ? (
                       <div className="mx-auto mt-0.5 grid size-6 place-items-center rounded-full bg-brand text-[12px] font-semibold text-brand-ink tnum">
@@ -437,7 +474,7 @@ export function CalendarGrid({
                       </div>
                     ) : (
                       <div className="mt-0.5 text-[13px] leading-6 text-ink tnum">
-                        {day.format(scale === "day" ? "MMMM D, YYYY" : "D")}
+                        {day.format(scale === "day" ? strings().format.dateLong : "D")}
                       </div>
                     )}
                   </div>
@@ -829,7 +866,7 @@ function BookingBar({
     <motion.div
       role="button"
       tabIndex={0}
-      aria-label={`${fullName(booking.guest)} · ${formatDate(booking.check_in)} to ${formatDate(booking.check_out)}`}
+      aria-label={strings().calendar.barLabel(fullName(booking.guest), formatDate(booking.check_in), formatDate(booking.check_out))}
       onPointerDown={(event) => onDragStart(event, booking, "move")}
       onClick={onClick}
       onKeyDown={(event) => {

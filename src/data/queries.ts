@@ -393,7 +393,7 @@ export function useCreateWorkspace() {
       createWorkspace(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: workspaceKeys.all });
-      toast.success("Company created");
+      toast.success(strings().ui.companyCreated);
     },
     onError: (error: Error) =>
       toast.error(strings().ui.couldNotCreateCompany, { description: error.message }),
@@ -407,7 +407,7 @@ export function useLeaveWorkspace() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: workspaceKeys.all });
       queryClient.removeQueries({ queryKey: queryKeys.snapshotRoot });
-      toast.success("You have left the company");
+      toast.success(strings().ui.leftCompany);
     },
     onError: (error: Error) =>
       toast.error(strings().ui.couldNotLeaveCompany, { description: error.message }),

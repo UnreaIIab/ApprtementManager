@@ -93,7 +93,7 @@ export function GuestQuickAdd({
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>
-            Cancel
+            {t.common.cancel}
           </Button>
           <Button variant="primary" onClick={onSubmit} loading={isSubmitting}>
             Add guest

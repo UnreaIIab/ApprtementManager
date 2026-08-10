@@ -194,7 +194,7 @@ function InvoicesView() {
   const columns: Column<InvoiceWithRelations>[] = [
     {
       key: "number",
-      header: "Invoice",
+      header: t.invoices.invoice,
       sortValue: (row) => row.number,
       cell: (row) => (
         <span className="block">
@@ -207,7 +207,7 @@ function InvoicesView() {
     },
     {
       key: "guest",
-      header: "Guest",
+      header: t.bookings.colGuest,
       sortValue: (row) => (row.guest ? row.guest.last_name : ""),
       cell: (row) =>
         row.guest ? (
@@ -224,20 +224,20 @@ function InvoicesView() {
     },
     {
       key: "apartment",
-      header: "Apartment",
+      header: t.change.apartment,
       secondary: true,
       sortValue: (row) => row.apartment?.name ?? "",
       cell: (row) => <span className="text-ink-2">{row.apartment?.name ?? "—"}</span>,
     },
     {
       key: "issue_date",
-      header: "Issued",
+      header: t.invoices.issued,
       sortValue: (row) => row.issue_date,
       cell: (row) => <span className="text-ink tnum">{formatDate(row.issue_date)}</span>,
     },
     {
       key: "due_date",
-      header: "Due",
+      header: t.invoices.due,
       sortValue: (row) => row.due_date ?? "",
       cell: (row) => {
         const overdue = row.status === "overdue";
@@ -250,14 +250,14 @@ function InvoicesView() {
     },
     {
       key: "total",
-      header: "Total",
+      header: t.common.total,
       align: "right",
       sortValue: (row) => row.total,
       cell: (row) => <span className="font-medium text-ink tnum">{money(row.total)}</span>,
     },
     {
       key: "paid",
-      header: "Paid",
+      header: t.bookings.paid,
       align: "right",
       secondary: true,
       sortValue: (row) => row.paid,
@@ -265,7 +265,7 @@ function InvoicesView() {
     },
     {
       key: "balance",
-      header: "Balance",
+      header: t.bookings.colBalance,
       align: "right",
       sortValue: (row) => row.balance,
       cell: (row) => (
@@ -276,7 +276,7 @@ function InvoicesView() {
     },
     {
       key: "status",
-      header: "Status",
+      header: t.common.status,
       sortValue: (row) => row.status,
       cell: (row) => <StatusBadge size="sm" meta={INVOICE_STATUS_META[row.status]} />,
     },
@@ -344,14 +344,14 @@ function InvoicesView() {
         actions={
           <>
             <Button variant="outline" icon={<Download className="size-4" />} onClick={() => exportRows(filtered)}>
-              Export
+              {t.common.export}
             </Button>
             <Button
               variant="primary"
               icon={<Plus className="size-4" />}
               onClick={() => router.push("/bookings?new=1")}
             >
-              New booking invoice
+              {t.invoices.newBookingInvoice}
             </Button>
           </>
         }
@@ -360,8 +360,8 @@ function InvoicesView() {
       <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <KpiCard label={t.invoices.invoiced} value={money(totals.invoiced, { cents: false })} hint={label} />
         <KpiCard label={t.invoices.collected} value={money(totals.paid, { cents: false })} hint="against these invoices" />
-        <KpiCard label={t.invoices.outstanding} value={money(totals.outstanding, { cents: false })} hint="still to collect" />
-        <KpiCard label={t.invoices.overdue} value={money(totals.overdue, { cents: false })} hint="past the due date" />
+        <KpiCard label={t.invoices.outstanding} value={money(totals.outstanding, { cents: false })} hint={t.invoices.stillToCollect} />
+        <KpiCard label={t.invoices.overdue} value={money(totals.overdue, { cents: false })} hint={t.invoices.pastDueDate} />
       </div>
 
       <FilterBar>
@@ -413,7 +413,7 @@ function InvoicesView() {
               icon={<Download className="size-3.5" />}
               onClick={() => exportRows(filtered.filter((row) => ids.includes(row.id)))}
             >
-              Export
+              {t.common.export}
             </Button>
             <Button
               size="sm"
@@ -421,7 +421,7 @@ function InvoicesView() {
               icon={<Printer className="size-3.5" />}
               onClick={() => window.print()}
             >
-              Print
+              {t.common.print}
             </Button>
           </>
         )}
@@ -460,7 +460,7 @@ function InvoicesView() {
                   icon={<Printer className="size-4" />}
                   onClick={() => window.print()}
                 >
-                  Print / PDF
+                  {t.invoices.printPdf}
                 </Button>
                 <Button
                   size="sm"
@@ -478,7 +478,7 @@ function InvoicesView() {
                   icon={<CreditCard className="size-4" />}
                   onClick={() => setPaymentFor(preview.id)}
                 >
-                  Record payment
+                  {t.bookings.recordPayment}
                 </Button>
               ) : null}
             </>

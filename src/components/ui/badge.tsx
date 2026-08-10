@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { strings } from "@/i18n";
 import type { StatusMeta } from "@/lib/constants";
 
 export function Badge({
@@ -82,7 +83,7 @@ export function DeltaBadge({
   className?: string;
 }) {
   if (value === null || !Number.isFinite(value)) {
-    return <span className={cn("text-[12px] text-ink-3", className)}>no prior data</span>;
+    return <span className={cn("text-[12px] text-ink-3", className)}>{strings().ui.noPriorData}</span>;
   }
   const flat = Math.abs(value) < 0.0005;
   const up = value > 0;

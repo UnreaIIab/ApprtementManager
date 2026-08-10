@@ -109,7 +109,7 @@ export function InvoiceDocument({
                   Qty
                 </th>
                 <th scope="col" className="py-2 text-right text-[11px] font-medium uppercase tracking-wide text-ink-3">
-                  Unit price
+                  {t.invoices.unitPrice}
                 </th>
                 <th scope="col" className="py-2 text-right text-[11px] font-medium uppercase tracking-wide text-ink-3">
                   Amount

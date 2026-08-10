@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
@@ -9,12 +9,15 @@ import {
   Bell, KeyRound, LogOut, Menu as MenuIcon, Moon, Search, Settings, Sun, UserRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { relativeTime } from "@/lib/format";
+import { deriveAlerts } from "@/lib/alerts";
+import { dayjs, toISODate } from "@/lib/date-range";
 import { useT } from "@/i18n";
 import { useAuth } from "@/hooks/use-auth";
 import { useIsClient } from "@/hooks/use-client";
 import { useSearch } from "@/hooks/use-search";
 import {
+  useBookings,
+  useInvoices,
   useMarkAllNotificationsRead,
   useMarkNotificationRead,
   useNotifications,
@@ -24,6 +27,7 @@ import { IconButton } from "@/components/ui/button";
 import { Avatar, Kbd } from "@/components/ui/feedback";
 import { DateFilter } from "./date-filter";
 import { OrgSwitcher } from "./org-switcher";
+import { NotificationList } from "./notification-list";
 
 export function Topbar({
   onOpenSidebar,
@@ -203,12 +207,38 @@ function ThemeToggle() {
 function NotificationsMenu() {
   const t = useT();
   const { data: notifications } = useNotifications();
+  const { data: bookings } = useBookings();
+  const { data: invoices } = useInvoices();
   const markRead = useMarkNotificationRead();
   const markAll = useMarkAllNotificationsRead();
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  const unread = notifications.filter((notification) => !notification.read_at).length;
+  /*
+   * Two feeds in one bell: conditions derived from the current data, which the
+   * app can always compute, and stored notifications, which currently nothing
+   * writes. The derived ones lead because they are the ones that need doing.
+   */
+  const alerts = useMemo(
+    () => deriveAlerts({ bookings, invoices, today: toISODate(dayjs()) }),
+    [bookings, invoices],
+  );
+
+  /*
+   * A condition the browser is already showing live must not also appear as a
+   * stored row — the scheduled job and the derived rules describe the same
+   * facts, and `dedupe_key` is what lets them be matched. The derived one wins:
+   * it is current, and it clears itself when the work is done.
+   */
+  const stored = useMemo(() => {
+    const live = new Set(alerts.map((alert) => alert.id));
+    return notifications.filter(
+      (notification) => !notification.dedupe_key || !live.has(notification.dedupe_key),
+    );
+  }, [notifications, alerts]);
+
+  const unreadStored = stored.filter((notification) => !notification.read_at).length;
+  const unread = alerts.length + unreadStored;
 
   useEffect(() => {
     if (!open) return;
@@ -218,13 +248,6 @@ function NotificationsMenu() {
     document.addEventListener("pointerdown", onPointerDown);
     return () => document.removeEventListener("pointerdown", onPointerDown);
   }, [open]);
-
-  const severityDot = {
-    info: "var(--info)",
-    success: "var(--good)",
-    warning: "var(--warning)",
-    critical: "var(--critical)",
-  } as const;
 
   return (
     <div ref={panelRef} className="relative">
@@ -254,7 +277,7 @@ function NotificationsMenu() {
           >
             <div className="flex items-center justify-between border-b border-line px-4 py-3">
               <h3 className="text-[14px] font-semibold text-ink">{t.chrome.notifications}</h3>
-              {unread > 0 ? (
+              {unreadStored > 0 ? (
                 <button
                   type="button"
                   onClick={() => markAll.mutate()}
@@ -266,45 +289,12 @@ function NotificationsMenu() {
             </div>
 
             <div className="max-h-[60vh] overflow-y-auto">
-              {notifications.length === 0 ? (
-                <p className="px-4 py-10 text-center text-[13px] text-ink-3">
-                  {t.chrome.allCaughtUp}
-                </p>
-              ) : (
-                notifications.map((notification) => (
-                  <Link
-                    key={notification.id}
-                    href={notification.link ?? "#"}
-                    onClick={() => {
-                      if (!notification.read_at) markRead.mutate(notification.id);
-                      setOpen(false);
-                    }}
-                    className={cn(
-                      "flex gap-3 border-b border-line px-4 py-3 transition-colors last:border-0",
-                      notification.read_at ? "hover:bg-surface-2" : "bg-brand-wash/40 hover:bg-brand-wash",
-                    )}
-                  >
-                    <span
-                      aria-hidden
-                      className="mt-1.5 size-2 shrink-0 rounded-full"
-                      style={{ background: severityDot[notification.severity] }}
-                    />
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-[13px] font-medium leading-snug text-ink">
-                        {notification.title}
-                      </span>
-                      {notification.body ? (
-                        <span className="mt-0.5 block text-[12px] leading-snug text-ink-2">
-                          {notification.body}
-                        </span>
-                      ) : null}
-                      <span className="mt-1 block text-[11px] text-ink-3">
-                        {relativeTime(notification.created_at)}
-                      </span>
-                    </span>
-                  </Link>
-                ))
-              )}
+              <NotificationList
+                alerts={alerts}
+                notifications={stored}
+                onMarkRead={(id) => markRead.mutate(id)}
+                onNavigate={() => setOpen(false)}
+              />
             </div>
           </motion.div>
         ) : null}

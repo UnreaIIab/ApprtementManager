@@ -170,7 +170,7 @@ export function DataTable<T>({
           <div className="ml-auto flex flex-wrap items-center gap-2">
             {bulkActions(selectedList)}
             <Button size="sm" variant="ghost" onClick={() => onSelectedChange?.(new Set())}>
-              Clear
+              {t.common.clear}
             </Button>
           </div>
         </div>

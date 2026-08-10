@@ -1,5 +1,8 @@
+"use client";
+
 import { AlertTriangle, Database } from "lucide-react";
 import { missingSupabaseVars } from "@/lib/supabase/env";
+import { useT } from "@/i18n";
 import { BrandMark } from "./sidebar";
 
 /**
@@ -13,6 +16,7 @@ import { BrandMark } from "./sidebar";
  * behaviour.
  */
 export function SetupRequired() {
+  const t = useT();
   const missing = missingSupabaseVars();
 
   return (
@@ -32,12 +36,10 @@ export function SetupRequired() {
             </span>
             <div className="min-w-0">
               <h1 className="text-[16px] font-semibold tracking-[-0.01em] text-ink">
-                Supabase is not configured
+                {t.setup.notConfiguredTitle}
               </h1>
               <p className="mt-1 text-[13.5px] leading-relaxed text-ink-2">
-                The app has no database to talk to, so it has not started. Add the
-                missing {missing.length === 1 ? "variable" : "variables"} below and
-                rebuild.
+                {missing.length === 1 ? t.setup.noDatabaseOne : t.setup.noDatabaseMany}
               </p>
             </div>
           </div>
@@ -56,28 +58,30 @@ export function SetupRequired() {
 
           <div className="mt-5 border-t border-line pt-5">
             <p className="text-[12.5px] font-medium text-ink">
-              Create <code className="rounded bg-surface-2 px-1 py-0.5">.env.local</code> in
-              the project root:
+              {t.setup.createEnvFile}{" "}
+              <code className="rounded bg-surface-2 px-1 py-0.5">.env.local</code>{" "}
+              {t.setup.inProjectRoot}
             </p>
             <pre className="mt-2 overflow-x-auto rounded-xl bg-surface-2 p-3 font-mono text-[12px] leading-relaxed text-ink-2">
 {`NEXT_PUBLIC_SUPABASE_URL=https://<ref>.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon key>`}
             </pre>
             <p className="mt-2.5 text-[12px] leading-relaxed text-ink-3">
-              Both come from <span className="text-ink-2">Project Settings → API</span>.
-              Use the <span className="text-ink-2">anon</span> key — never{" "}
-              <span className="text-ink-2">service_role</span>, which bypasses row-level
-              security and would be shipped to every browser.
+              {t.setup.bothComeFrom}{" "}
+              <span className="text-ink-2">Project Settings → API</span>.{" "}
+              {t.setup.useAnonKey} <span className="text-ink-2">anon</span> —{" "}
+              {t.setup.neverServiceRole}{" "}
+              <span className="text-ink-2">service_role</span>, {t.setup.serviceRoleWarning}
             </p>
             <p className="mt-2.5 text-[12px] leading-relaxed text-ink-3">
-              These are inlined at build time, so rebuild after adding them.
+              {t.setup.inlinedAtBuild}
             </p>
           </div>
 
           <div className="mt-5 flex items-center gap-2 rounded-xl bg-surface-2 px-3 py-2.5 text-[12.5px] text-ink-2">
             <Database className="size-4 shrink-0 text-ink-3" aria-hidden />
             <span>
-              Full walkthrough in{" "}
+              {t.setup.fullWalkthrough}{" "}
               <span className="font-medium text-ink">docs/supabase-setup.md</span>
             </span>
           </div>

@@ -1,6 +1,7 @@
 import { strings } from "@/i18n";
 import type {
   ApartmentStatus,
+  BillType,
   BookingSource,
   BookingStatus,
   ExpenseCategory,
@@ -233,9 +234,17 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   },
 };
 
+export const BILL_TYPE_LABELS: Record<BillType, string> = {
+  get electricity() { return strings().billType.electricity; },
+  get water() { return strings().billType.water; },
+  get internet() { return strings().billType.internet; },
+  get syndic() { return strings().billType.syndic; },
+  get tax() { return strings().billType.tax; },
+};
+
 export const EXPENSE_CATEGORY_LABELS: Record<ExpenseCategory, string> = {
-  get utilities() {
-    return strings().category.utilities;
+  get bills() {
+    return strings().category.bills;
   },
   get cleaning() {
     return strings().category.cleaning;
@@ -317,9 +326,9 @@ export function sourceColor(source: BookingSource): string {
  * and fold the rest into "Other" rather than inventing a ninth hue.
  */
 export const CATEGORY_ORDER: ExpenseCategory[] = [
+  "bills",
   "cleaning",
   "maintenance",
-  "utilities",
   "repairs",
   "commission",
   "supplies",
@@ -330,6 +339,20 @@ export const CATEGORY_ORDER: ExpenseCategory[] = [
   "staff",
   "other",
 ];
+
+/**
+ * A category label that tolerates data the app can no longer create.
+ *
+ * `utilities` was merged into `bills`, but PostgreSQL cannot drop a value from
+ * an enum, so a row written straight through SQL could still carry it. Falling
+ * back keeps such a row readable instead of rendering an empty cell.
+ */
+export function expenseCategoryLabel(category: string): string {
+  const known = (EXPENSE_CATEGORY_LABELS as Record<string, string>)[category];
+  if (known) return known;
+  if (category === "utilities") return strings().category.utilities;
+  return category;
+}
 
 export function categoryColor(category: ExpenseCategory): string {
   const index = CATEGORY_ORDER.indexOf(category);

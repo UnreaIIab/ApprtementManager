@@ -106,7 +106,7 @@ function LoginView() {
                 id="login-email"
                 type="email"
                 autoComplete="email"
-                placeholder="you@company.com"
+                placeholder={t.auth.emailPlaceholder}
                 {...register("email")}
               />
             </Field>

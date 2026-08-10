@@ -34,6 +34,7 @@ export const fr = {
   },
 
   common: {
+    exportSelected: "Exporter la sélection",
     save: "Enregistrer",
     saving: "Enregistrement…",
     saveChanges: "Enregistrer les modifications",
@@ -156,6 +157,7 @@ export const fr = {
   },
 
   category: {
+    bills: "Bills",
     utilities: "Charges",
     cleaning: "Ménage",
     maintenance: "Maintenance",
@@ -218,6 +220,16 @@ export const fr = {
   },
 
   settings: {
+    paletteNote2: "Huit teintes catégorielles dans un ordre fixe, validées pour les déficiences de la vision des couleurs sur les deux surfaces. La couleur suit l’entité, jamais son rang.",
+    invitationsViaAuth: "Les invitations sont émises via Supabase Auth.",
+    authUnavailable: "Supabase n’est pas configuré, l’authentification est donc indisponible. Ajoutez vos clés et reconstruisez pour activer la connexion et la gestion des mots de passe.",
+    inviteMember: "Inviter un membre",
+    updatePassword: "Mettre à jour le mot de passe",
+    invitationsViaSupabase: "Les invitations sont émises via Supabase Auth.",
+    themesDesigned: "Les deux thèmes sont conçus séparément — le mode sombre n’est pas une inversion automatique du clair.",
+    paletteNote: "Huit teintes catégorielles dans un ordre fixe, validées pour les déficiences de la vision des couleurs.",
+    refund50: "Remboursement de 50 % jusqu’à 48 heures avant l’arrivée",
+    emailNeedsFunction: "L’envoi par e-mail nécessite une fonction Edge Supabase — voir le guide de déploiement.",
     title: "Paramètres",
     description: "Informations de la société, facturation, apparence et accès.",
     tabCompany: "Société",
@@ -426,6 +438,7 @@ export const fr = {
   },
 
   calendar: {
+    barLabel: (guest: string, from: string, to: string) => `${guest} · du ${from} au ${to}`,
     title: "Calendrier",
     description: "Cliquez une disponibilité pour la remplir, glissez un séjour pour le déplacer, ou tirez un bord pour changer les dates.",
     newBooking: "Nouvelle réservation",
@@ -473,6 +486,7 @@ export const fr = {
   },
 
   availability: {
+    onlyAvailable: "Afficher uniquement les disponibles",
     checkIn: "Arrivée",
     checkOut: "Départ",
     findAvailability: "Trouver une disponibilité",
@@ -508,6 +522,9 @@ export const fr = {
   },
 
   bookings: {
+    deleteManyMessage: "Les paiements et factures rattachés seront également supprimés. Cette action est irréversible.",
+    countOfTotal: (shown: number, total: number, period: string) => `${shown} réservation${shown === 1 ? "" : "s"} sur ${total} · ${period}`,
+    priceBreakdown: "Détail du prix",
     title: "Réservations",
     description: "Toutes les réservations de la période sélectionnée.",
     newBooking: "Nouvelle réservation",
@@ -608,6 +625,23 @@ export const fr = {
   },
 
   apartments: {
+    rate: "Tarif",
+    coordinatesHint: "Facultatif. Des coordonnées ajoutent une carte sur la page partagée ; sans elles, l’adresse est recherchée par son nom. Dans Google Maps, faites un clic droit sur le bâtiment puis cliquez sur les chiffres pour les copier.",
+    sharePageScope: "La page affiche les photos, la description, les équipements, la capacité, la localisation et le tarif par nuit. Elle ne peut atteindre ni vos réservations, ni vos clients, ni vos factures, ni aucun autre appartement — la base ne renvoie que ces champs précis.",
+    shareHint: "Envoyez au client un lien montrant les photos, les détails et la localisation. Aucune connexion requise de son côté.",
+    photosHint: "Elles apparaissent sur la page partagée. La photo principale est ce que le client voit en premier, et ce que WhatsApp affiche dans l’aperçu du lien.",
+    unitsPerformance: (n: number, period: string) => `${n} logement${n === 1 ? "" : "s"} · performance sur ${period}`,
+    occupiedNightsAcross: (period: string) => `Nuits occupées sur ${period}.`,
+    occupiedNightsIn: (period: string) => `Nuits occupées sur ${period}. Plus c’est foncé, plus c’est réservé.`,
+    clearStatus: "Effacer le statut",
+    mapLocation: "Emplacement sur la carte",
+    choosePhotos: "Choisir des photos",
+    sendWhatsApp: "Envoyer sur WhatsApp",
+    newLink: "Nouveau lien",
+    perAvailableNight: "par nuit disponible",
+    arrivalsInPeriod: "arrivées sur la période",
+    nightsPerBooking: "nuits par réservation",
+    ofArrivalsInPeriod: "des arrivées sur la période",
     bedsGuests: (bedrooms: number, capacity: number) =>
       `${bedrooms} ch · ${capacity} pers.`,
     title: "Appartements",
@@ -705,6 +739,9 @@ export const fr = {
   },
 
   guests: {
+    countOfTotal: (shown: number, total: number) => `${shown} profil${shown === 1 ? "" : "s"} sur ${total}`,
+    completedAndUpcoming: "passés et à venir",
+    acrossAllBookings: "sur toutes les réservations",
     title: "Clients",
     description: "Toutes les personnes ayant séjourné chez vous, et leur valeur.",
     addGuest: "Ajouter un client",
@@ -768,6 +805,10 @@ export const fr = {
   },
 
   invoices: {
+    newBookingInvoice: "Facture depuis une réservation",
+    unitPrice: "Prix unitaire",
+    stillToCollect: "encore à encaisser",
+    pastDueDate: "au-delà de l’échéance",
     title: "Factures",
     description: "Documents émis sur la période sélectionnée.",
     searchInvoices: "Rechercher des factures",
@@ -801,6 +842,11 @@ export const fr = {
   },
 
   payments: {
+    largestOutstanding: "Plus gros soldes à encaisser",
+    largestOutstandingHint: "Réservations avec de l’argent à encaisser, toutes périodes confondues.",
+    inThisPeriod: "sur cette période",
+    stillOwedOnStays: "encore dû sur les séjours de cette période",
+    fromBankOrTerminal: "Depuis la banque ou le terminal. Un numéro de reçu est attribué automatiquement.",
     title: "Paiements",
     description: "Tout ce qui a été encaissé sur la période sélectionnée.",
     recordPayment: "Enregistrer un paiement",
@@ -832,6 +878,7 @@ export const fr = {
   },
 
   expenses: {
+    shareOfRevenue: "part des dépenses dans le chiffre d’affaires",
     title: "Dépenses",
     description: "Ce que le portefeuille a coûté sur la période sélectionnée.",
     recordExpense: "Enregistrer une dépense",
@@ -871,6 +918,11 @@ export const fr = {
   },
 
   reports: {
+    thisPeriod: "Cette période",
+    lastYear: "L’an dernier",
+    occupancyAdrNote: "L’occupation est en pourcentage ; l’ADR a son propre graphique pour éviter un second axe.",
+    withStayInPeriod: "avec un séjour sur la période",
+    perGuest: "par client",
     exportCsv: "Exporter CSV",
     savePdf: "Enregistrer en PDF",
     title: "Rapports",
@@ -937,6 +989,7 @@ export const fr = {
   },
 
   auth: {
+    emailPlaceholder: "vous@societe.com",
     signInSubtitle: "Gérez les réservations, l’occupation et le chiffre d’affaires de votre portefeuille.",
     sessionNote: "Les sessions sont gérées par Supabase Auth et rafraîchies automatiquement. Chaque requête est cloisonnée à votre société par la sécurité au niveau des lignes.",
     heroTitle: "Chaque appartement, chaque nuit, chaque dirham — au même endroit.",
@@ -960,6 +1013,7 @@ export const fr = {
   },
 
   listing: {
+    openInMaps: "Ouvrir dans Maps",
     unavailable: "Annonce indisponible",
     unavailableHint: "Ce lien n’est plus actif. Demandez-en un nouveau au propriétaire.",
     loading: "Chargement",
@@ -1040,6 +1094,9 @@ export const fr = {
   },
 
   printReport: {
+    spanningNote: "* Séjour à cheval sur la période : les nuits et le chiffre d’affaires indiqués sont ceux de la période ; le payé et le solde portent sur la réservation entière.",
+    colNightsPeriod: "Nuits",
+    colRevenuePeriod: "CA période",
     scope: "Portée",
     allApartments: "Tous les appartements",
     scopedTo: "Périmètre",
@@ -1060,7 +1117,7 @@ export const fr = {
     occupancy: "Taux d’occupation",
     adr: "Prix moyen par nuit (ADR)",
     revpar: "RevPAR",
-    bookingCount: "Réservations",
+    bookingCount: "Arrivées sur la période",
     bookingsTable: "DÉTAIL DES RÉSERVATIONS",
     expensesTable: "DÉTAIL DES DÉPENSES",
     colRef: "Réf.",
@@ -1083,7 +1140,82 @@ export const fr = {
     footer: (company: string) => `${company} — document généré automatiquement.`,
   },
 
+  alerts: {
+    checkoutOverdue: "Départ non enregistré",
+    checkoutToday: "Départ à enregistrer aujourd’hui",
+    checkinMissed: "Arrivée non enregistrée",
+    balanceAfterStay: "Solde impayé après le séjour",
+    invoiceOverdue: "Facture en retard",
+    bookingLine: (guest: string, apartment: string, reference: string) =>
+      `${guest} · ${apartment} · ${reference}`,
+    invoiceLine: (number: string, guest: string) => `${number} · ${guest}`,
+    needsAction: "À traiter",
+    allClear: "Rien à traiter.",
+  },
+
+  validation: {
+    billTypeRequired: "Choisissez le type de facture",
+    useDatePicker: "Utilisez le sélecteur pour choisir une date",
+    enterAmount: "Saisissez un montant",
+    amountsInCents: "Les montants sont stockés en centimes",
+    cannotBeNegative: "Ne peut pas être négatif",
+    chooseApartment: "Choisissez un appartement",
+    chooseGuest: "Choisissez un client",
+    atLeastOneAdult: "Au moins un adulte",
+    checkOutAfterCheckIn: "Le départ doit être après l’arrivée",
+    firstNameRequired: "Le prénom est obligatoire",
+    lastNameRequired: "Le nom est obligatoire",
+    validEmail: "Saisissez une adresse e-mail valide",
+    codeRequired: "Le code est obligatoire",
+    nameRequired: "Le nom est obligatoire",
+    atLeastOneGuest: "Au moins un client",
+    amountAboveZero: "Saisissez un montant supérieur à zéro",
+    describeLine: "Décrivez la ligne",
+    quantityAboveZero: "La quantité doit être supérieure à zéro",
+    atLeastOneLine: "Ajoutez au moins une ligne",
+    taskTitleRequired: "Donnez un titre à la tâche",
+    companyNameRequired: "Le nom de la société est obligatoire",
+    currencyCode3: "Utilisez un code devise à 3 lettres",
+    atLeast8Chars: "Utilisez au moins 8 caractères",
+    passwordsMismatch: "Les mots de passe ne correspondent pas",
+    enterPassword: "Saisissez votre mot de passe",
+  },
+
+  setup: {
+    notConfiguredTitle: "Supabase n’est pas configuré",
+    noDatabaseOne: "L’application n’a aucune base de données à interroger et n’a donc pas démarré. Ajoutez la variable manquante ci-dessous puis reconstruisez.",
+    noDatabaseMany: "L’application n’a aucune base de données à interroger et n’a donc pas démarré. Ajoutez les variables manquantes ci-dessous puis reconstruisez.",
+    createEnvFile: "Créez",
+    inProjectRoot: "à la racine du projet :",
+    bothComeFrom: "Les deux proviennent de",
+    useAnonKey: "Utilisez la clé",
+    neverServiceRole: "jamais",
+    serviceRoleWarning: "qui contourne la sécurité au niveau des lignes et serait livrée à chaque navigateur.",
+    inlinedAtBuild: "Elles sont intégrées à la compilation : reconstruisez après les avoir ajoutées.",
+    fullWalkthrough: "Guide complet dans",
+  },
+
+  billType: {
+    electricity: "Électricité",
+    water: "Eau",
+    internet: "Internet",
+    syndic: "Syndic",
+    tax: "TVA / Impôts",
+    label: "Type de facture",
+    required: "Choisissez le type de facture",
+    document: "Document",
+    documentHint: "PDF ou photo de la facture, 8 Mo maximum",
+    uploadDocument: "Joindre un document",
+    replaceDocument: "Remplacer",
+    removeDocument: "Retirer",
+    openDocument: "Ouvrir",
+    uploading: "Téléversement…",
+    uploadFailed: "Échec du téléversement",
+    linkExpired: "Impossible d’ouvrir le document",
+  },
+
   ui: {
+    noPriorData: "aucune donnée antérieure",
     chartView: "Graphique",
     tableView: "Tableau",
     noDataInPeriod: "Aucune donnée sur cette période.",
@@ -1124,6 +1256,7 @@ export const fr = {
   },
 
   workspace: {
+    switchCompanyLabel: (name: string) => `Société actuelle : ${name}. Changer de société`,
     createCompany: "Créer une société",
     createCompanyHint: "Gérer un second portefeuille séparément",
     createCompanyDescription: "Un jeu de comptes distinct — sa propre devise, ses taxes, sa numérotation de factures et son équipe.",

@@ -2,6 +2,7 @@
 
 import { createContext, useContext, type ReactNode } from "react";
 import dayjs from "dayjs";
+import { z } from "zod";
 import "dayjs/locale/fr";
 import "dayjs/locale/en-gb";
 import { fr, type Dictionary } from "./fr";
@@ -54,6 +55,13 @@ export function setActiveLocale(locale: string | null | undefined) {
   activeLocale = normaliseLocale(locale);
   active = DICTIONARIES[activeLocale];
   dayjs.locale(DAYJS_LOCALES[activeLocale]);
+  /*
+   * Zod's own messages — "expected boolean, received undefined" and the rest —
+   * are emitted by the library, not by our schemas, so translating every custom
+   * message still left English under any field we had not written copy for.
+   * Zod 4 ships the locales; this points it at the active one.
+   */
+  z.config(activeLocale === "fr" ? z.locales.fr() : z.locales.en());
 }
 
 /** The active dictionary, for non-React code. */

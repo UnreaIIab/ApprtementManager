@@ -17,6 +17,7 @@ import {
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { useAuth } from "@/hooks/use-auth";
 import { useOrganization, useSnapshot, useUpdateOrganization } from "@/data/queries";
+import { NOTIFICATION_RULE_KEYS, notificationSettings } from "@/lib/notification-settings";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardBody, CardFooter, CardHeader } from "@/components/ui/card";
 import { Tabs } from "@/components/ui/tabs";
@@ -237,7 +238,7 @@ function CompanySettings({ tab }: { tab: "company" | "invoicing" }) {
                   />
                   <Checkbox
                     defaultChecked
-                    label="50% refund up to 48 hours before arrival"
+                    label={t.settings.refund50}
                   />
                   <Checkbox label={t.settings.noRefundNoShow} defaultChecked />
                 </div>
@@ -258,7 +259,7 @@ function CompanySettings({ tab }: { tab: "company" | "invoicing" }) {
             {isDirty ? t.settings.unsavedChanges : t.settings.allSaved}
           </p>
           <Button type="submit" variant="primary" loading={isSubmitting} disabled={!isDirty}>
-            Save changes
+            {t.common.saveChanges}
           </Button>
         </CardFooter>
       </Card>
@@ -283,7 +284,7 @@ function AppearanceSettings() {
     <Card>
       <CardHeader
         title={t.settings.tabAppearance}
-        description="Both themes are separately designed — dark mode is not an automatic flip of light."
+        description={t.settings.themesDesigned}
       />
       <CardBody>
         <div className="grid gap-3 sm:grid-cols-3">
@@ -316,8 +317,7 @@ function AppearanceSettings() {
         <div className="mt-6 border-t border-line pt-5">
           <h3 className="text-[13px] font-medium text-ink">{t.settings.chartPalette}</h3>
           <p className="mt-1 text-[12.5px] text-ink-2">
-            Eight categorical hues in a fixed order, validated for colour-vision deficiency
-            against both surfaces. Colour follows the entity, never its rank.
+            {t.settings.paletteNote2}
           </p>
           <ul className="mt-3 flex flex-wrap gap-2">
             {Array.from({ length: 8 }, (_, index) => (
@@ -340,30 +340,53 @@ function AppearanceSettings() {
 /* ------------------------------------------------------------------ */
 
 /* Module scope, so each label reads the active dictionary when accessed. */
-const NOTIFICATION_RULES = [
-  ["upcoming_check_in", "upcomingCheckIn", "upcomingCheckInHint"],
-  ["upcoming_check_out", "upcomingCheckOut", "upcomingCheckOutHint"],
-  ["late_payment", "latePayment", "latePaymentHint"],
-  ["invoice_due", "invoiceDue", "invoiceDueHint"],
-  ["cleaning_reminder", "cleaningReminder", "cleaningReminderHint"],
-  ["maintenance_reminder", "maintenanceReminder", "maintenanceReminderHint"],
-  ["booking_conflict", "bookingConflict", "bookingConflictHint"],
-  ["apartment_available", "apartmentAvailable", "apartmentAvailableHint"],
-].map(([key, labelKey, hintKey]) => ({
+/*
+ * Driven by the shared key list, so a rule cannot exist in the UI without the
+ * scheduled job knowing about it — or the reverse.
+ */
+const RULE_COPY: Record<string, [labelKey: string, hintKey: string]> = {
+  upcoming_check_in: ["upcomingCheckIn", "upcomingCheckInHint"],
+  upcoming_check_out: ["upcomingCheckOut", "upcomingCheckOutHint"],
+  late_payment: ["latePayment", "latePaymentHint"],
+  invoice_due: ["invoiceDue", "invoiceDueHint"],
+  cleaning_reminder: ["cleaningReminder", "cleaningReminderHint"],
+  maintenance_reminder: ["maintenanceReminder", "maintenanceReminderHint"],
+  booking_conflict: ["bookingConflict", "bookingConflictHint"],
+  apartment_available: ["apartmentAvailable", "apartmentAvailableHint"],
+};
+
+const NOTIFICATION_RULES = NOTIFICATION_RULE_KEYS.map((key) => ({
   key,
   get label() {
-    return strings().settings[labelKey as "upcomingCheckIn"];
+    return strings().settings[RULE_COPY[key][0] as "upcomingCheckIn"];
   },
   get description() {
-    return strings().settings[hintKey as "upcomingCheckInHint"];
+    return strings().settings[RULE_COPY[key][1] as "upcomingCheckInHint"];
   },
 }));
 
 function NotificationSettings() {
   const t = useT();
-  const [enabled, setEnabled] = useState<Record<string, boolean>>(
-    Object.fromEntries(NOTIFICATION_RULES.map((rule) => [rule.key, true])),
-  );
+  const organization = useOrganization();
+  const updateOrganization = useUpdateOrganization();
+
+  /*
+   * Persisted in `organizations.settings`, a jsonb column that has existed
+   * since the first migration and was never written to. Before this the
+   * switches lived in component state and "Save" only raised a success toast —
+   * the preferences reset on reload, and the scheduled job had nothing to read.
+   */
+  const saved = notificationSettings(organization?.settings);
+  const [draft, setDraft] = useState<Record<string, boolean> | null>(null);
+  const enabled = draft ?? saved;
+  const dirty = draft !== null && NOTIFICATION_RULES.some((r) => draft[r.key] !== saved[r.key]);
+
+  const save = async () => {
+    await updateOrganization.mutateAsync({
+      settings: { ...(organization?.settings ?? {}), notifications: enabled },
+    });
+    setDraft(null);
+  };
 
   return (
     <Card>
@@ -378,9 +401,9 @@ function NotificationSettings() {
               <Switch
                 label={rule.label}
                 description={rule.description}
-                checked={enabled[rule.key]}
+                checked={enabled[rule.key] ?? true}
                 onCheckedChange={(value) =>
-                  setEnabled((current) => ({ ...current, [rule.key]: value }))
+                  setDraft({ ...enabled, [rule.key]: value })
                 }
               />
             </div>
@@ -388,11 +411,14 @@ function NotificationSettings() {
         </div>
       </CardBody>
       <CardFooter>
-        <p className="text-[12.5px] text-ink-3">
-          Email delivery requires a Supabase Edge Function — see the deployment guide.
-        </p>
-        <Button variant="primary" onClick={() => toast.success(t.settings.notificationPrefsSaved)}>
-          Save preferences
+        <p className="text-[12.5px] text-ink-3">{t.settings.emailNeedsFunction}</p>
+        <Button
+          variant="primary"
+          disabled={!dirty}
+          loading={updateOrganization.isPending}
+          onClick={() => void save()}
+        >
+          {t.common.saveChanges}
         </Button>
       </CardFooter>
     </Card>
@@ -438,7 +464,7 @@ function TeamSettings() {
         </CardBody>
         <CardFooter>
           <p className="text-[12.5px] text-ink-3">
-            Invitations are issued through Supabase Auth.
+            {t.settings.invitationsViaAuth}
           </p>
           <Button
             variant="outline"
@@ -449,7 +475,7 @@ function TeamSettings() {
               })
             }
           >
-            Invite member
+            {t.settings.inviteMember}
           </Button>
         </CardFooter>
       </Card>
@@ -511,8 +537,7 @@ function SecuritySettings() {
         <CardBody>
           {!authEnabled ? (
             <p className="rounded-xl bg-warning-wash px-3.5 py-3 text-[13px] text-ink">
-              Supabase is not configured, so authentication is unavailable. Add your
-              keys and rebuild to enable sign-in and password management.
+              {t.settings.authUnavailable}
             </p>
           ) : (
             <div className="space-y-4">
@@ -549,7 +574,7 @@ function SecuritySettings() {
             loading={saving}
             onClick={submit}
           >
-            Update password
+            {t.settings.updatePassword}
           </Button>
         </CardFooter>
       </Card>
@@ -648,7 +673,7 @@ function DataSettings() {
                 )
               }
             >
-              Export CSV
+              {t.reports.exportCsv}
             </Button>
             <Button variant="primary" onClick={backup}>
               Download backup

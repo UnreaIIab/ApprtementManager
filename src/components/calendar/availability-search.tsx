@@ -195,7 +195,7 @@ export function AvailabilitySearch({
               onChange={(event) => onOnlyAvailableChange(event.target.checked)}
               className="size-3.5 cursor-pointer rounded border-line accent-[var(--brand)]"
             />
-            Show only available
+            {t.availability.onlyAvailable}
           </label>
         </div>
       ) : null}

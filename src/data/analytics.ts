@@ -10,7 +10,7 @@ import {
   toISODate,
   type Granularity,
 } from "@/lib/date-range";
-import { BOOKING_SOURCE_LABELS, EXPENSE_CATEGORY_LABELS } from "@/lib/constants";
+import { BOOKING_SOURCE_LABELS, expenseCategoryLabel } from "@/lib/constants";
 import { strings } from "@/i18n";
 import type {
   Apartment,
@@ -61,6 +61,26 @@ function nightlyBases(booking: Booking) {
     // Everything the guest owes, which is what "Total revenue" reports.
     total: booking.total / nights,
   };
+}
+
+/**
+ * A stay's share of one period.
+ *
+ * Revenue is recognised per night, so a stay running from July into August
+ * belongs to both months in proportion. Any report listing bookings for a
+ * period has to use this, or its total will not agree with the KPI above it —
+ * which is precisely what a statement is meant to substantiate.
+ *
+ * Uses the same basis as `computeKpis`, deliberately: one definition of what a
+ * night is worth, or the two drift.
+ */
+export function bookingPeriodShare(
+  booking: Booking,
+  range: DateRange,
+): { nights: number; revenue: number } {
+  const nights = nightsWithinRange(booking.check_in, booking.check_out, range);
+  if (nights <= 0) return { nights: 0, revenue: 0 };
+  return { nights, revenue: Math.round(nightlyBases(booking).total * nights) };
 }
 
 export interface AnalyticsInput {
@@ -298,7 +318,7 @@ export function expensesByCategory(expenses: Expense[], range: DateRange): Break
     if (!isWithin(expense.expense_date, range)) continue;
     totals.set(expense.category, (totals.get(expense.category) ?? 0) + expense.amount);
   }
-  return toSlices(totals, (key) => EXPENSE_CATEGORY_LABELS[key]);
+  return toSlices(totals, (key) => expenseCategoryLabel(key));
 }
 
 export function expensesByApartment(

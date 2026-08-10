@@ -213,7 +213,7 @@ function BookingsView() {
   const bulkDelete = async (ids: string[]) => {
     const ok = await confirm({
       title: t.bookings.deleteMany(ids.length),
-      message: "Payments and invoices attached to them will be removed too. This cannot be undone.",
+      message: t.bookings.deleteManyMessage,
       confirmLabel: t.bookings.deletePermanently,
       destructive: true,
     });
@@ -225,7 +225,7 @@ function BookingsView() {
   const columns: Column<BookingWithRelations>[] = [
     {
       key: "reference",
-      header: "Booking",
+      header: t.bookings.colBooking,
       sortValue: (row) => row.reference,
       cell: (row) => (
         <span className="block">
@@ -238,7 +238,7 @@ function BookingsView() {
     },
     {
       key: "guest",
-      header: "Guest",
+      header: t.bookings.colGuest,
       sortValue: (row) => `${row.guest.last_name} ${row.guest.first_name}`,
       cell: (row) => (
         <span className="flex items-center gap-2.5">
@@ -261,7 +261,7 @@ function BookingsView() {
     },
     {
       key: "apartment",
-      header: "Apartment",
+      header: t.change.apartment,
       sortValue: (row) => row.apartment.name,
       cell: (row) => (
         <span className="block">
@@ -272,7 +272,7 @@ function BookingsView() {
     },
     {
       key: "check_in",
-      header: "Stay",
+      header: t.bookings.colStay,
       sortValue: (row) => row.check_in,
       cell: (row) => (
         <span className="block whitespace-nowrap">
@@ -287,13 +287,13 @@ function BookingsView() {
     },
     {
       key: "status",
-      header: "Status",
+      header: t.common.status,
       sortValue: (row) => row.status,
       cell: (row) => <StatusBadge size="sm" meta={BOOKING_STATUS_META[row.status]} />,
     },
     {
       key: "source",
-      header: "Source",
+      header: t.bookings.colSource,
       secondary: true,
       sortValue: (row) => row.source,
       cell: (row) => (
@@ -302,14 +302,14 @@ function BookingsView() {
     },
     {
       key: "total",
-      header: "Total",
+      header: t.common.total,
       align: "right",
       sortValue: (row) => row.total,
       cell: (row) => <span className="font-medium text-ink tnum">{money(row.total)}</span>,
     },
     {
       key: "paid",
-      header: "Paid",
+      header: t.bookings.paid,
       align: "right",
       secondary: true,
       sortValue: (row) => row.paid,
@@ -317,7 +317,7 @@ function BookingsView() {
     },
     {
       key: "balance",
-      header: "Balance",
+      header: t.bookings.colBalance,
       align: "right",
       sortValue: (row) => row.balance,
       cell: (row) => (
@@ -388,7 +388,7 @@ function BookingsView() {
     <>
       <PageHeader
         title={t.bookings.title}
-        description={`${filtered.length} of ${bookings.length} reservations · ${label}`}
+        description={t.bookings.countOfTotal(filtered.length, bookings.length, label)}
         actions={
           <>
             <Button
@@ -396,7 +396,7 @@ function BookingsView() {
               icon={<Download className="size-4" />}
               onClick={() => exportRows(filtered)}
             >
-              Export
+              {t.common.export}
             </Button>
             <Button
               variant="primary"
@@ -406,7 +406,7 @@ function BookingsView() {
                 setFormOpen(true);
               }}
             >
-              New booking
+              {t.calendar.newBooking}
             </Button>
           </>
         }
@@ -523,7 +523,7 @@ function BookingsView() {
                 exportRows(filtered.filter((booking) => ids.includes(booking.id)))
               }
             >
-              Export
+              {t.common.export}
             </Button>
             <Button
               size="sm"
@@ -531,7 +531,7 @@ function BookingsView() {
               icon={<Printer className="size-3.5" />}
               onClick={() => window.print()}
             >
-              Print
+              {t.common.print}
             </Button>
             <Button
               size="sm"
@@ -539,7 +539,7 @@ function BookingsView() {
               icon={<Ban className="size-3.5" />}
               onClick={() => void bulkCancel(ids)}
             >
-              Cancel
+              {t.common.cancel}
             </Button>
             <Button
               size="sm"

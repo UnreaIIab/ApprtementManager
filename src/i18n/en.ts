@@ -25,6 +25,7 @@ export const en: Dictionary = {
   },
 
   common: {
+    exportSelected: "Export selected",
     save: "Save",
     saving: "Saving…",
     saveChanges: "Save changes",
@@ -147,6 +148,7 @@ export const en: Dictionary = {
   },
 
   category: {
+    bills: "Bills",
     utilities: "Utilities",
     cleaning: "Cleaning",
     maintenance: "Maintenance",
@@ -204,6 +206,16 @@ export const en: Dictionary = {
   },
 
   settings: {
+    paletteNote2: "Eight categorical hues in a fixed order, validated for colour-vision deficiency against both surfaces. Colour follows the entity, never its rank.",
+    invitationsViaAuth: "Invitations are issued through Supabase Auth.",
+    authUnavailable: "Supabase is not configured, so authentication is unavailable. Add your keys and rebuild to enable sign-in and password management.",
+    inviteMember: "Invite member",
+    updatePassword: "Update password",
+    invitationsViaSupabase: "Invitations are issued through Supabase Auth.",
+    themesDesigned: "Both themes are separately designed — dark mode is not an automatic flip of light.",
+    paletteNote: "Eight categorical hues in a fixed order, validated for colour-vision deficiency.",
+    refund50: "50% refund up to 48 hours before arrival",
+    emailNeedsFunction: "Email delivery requires a Supabase Edge Function — see the deployment guide.",
     title: "Settings",
     description: "Company details, invoicing, appearance and access.",
     tabCompany: "Company",
@@ -412,6 +424,7 @@ export const en: Dictionary = {
   },
 
   calendar: {
+    barLabel: (guest: string, from: string, to: string) => `${guest} · ${from} to ${to}`,
     title: "Calendar",
     description: "Click an opening to fill it, drag a stay to move it, or pull an edge to change the dates.",
     newBooking: "New booking",
@@ -459,6 +472,7 @@ export const en: Dictionary = {
   },
 
   availability: {
+    onlyAvailable: "Show only available",
     checkIn: "Check-in",
     checkOut: "Check-out",
     findAvailability: "Find availability",
@@ -494,6 +508,9 @@ export const en: Dictionary = {
   },
 
   bookings: {
+    deleteManyMessage: "Payments and invoices attached to them will be removed too. This cannot be undone.",
+    countOfTotal: (shown: number, total: number, period: string) => `${shown} of ${total} reservations · ${period}`,
+    priceBreakdown: "Price breakdown",
     title: "Bookings",
     description: "Every reservation in the selected period.",
     newBooking: "New booking",
@@ -594,6 +611,23 @@ export const en: Dictionary = {
   },
 
   apartments: {
+    rate: "Rate",
+    coordinatesHint: "Optional. Adding coordinates puts a map on the shared listing page; without them it falls back to searching the address by name. In Google Maps, right-click the building and click the numbers to copy them.",
+    sharePageScope: "The page shows photos, description, amenities, capacity, location and the nightly rate. It cannot reach your bookings, guests, invoices or any other apartment — the database only ever returns those specific fields.",
+    shareHint: "Send a client a link showing the photos, details and location. No login needed on their side.",
+    photosHint: "These appear on the shared listing page. The cover is what a client sees first, and what WhatsApp shows in its link preview.",
+    unitsPerformance: (n: number, period: string) => `${n} unit${n === 1 ? "" : "s"} · performance for ${period}`,
+    occupiedNightsAcross: (period: string) => `Occupied nights across ${period}.`,
+    occupiedNightsIn: (period: string) => `Occupied nights in ${period}. Darker means booked.`,
+    clearStatus: "Clear status",
+    mapLocation: "Map location",
+    choosePhotos: "Choose photos",
+    sendWhatsApp: "Send on WhatsApp",
+    newLink: "New link",
+    perAvailableNight: "per available night",
+    arrivalsInPeriod: "arrivals in period",
+    nightsPerBooking: "nights per booking",
+    ofArrivalsInPeriod: "of arrivals in period",
     bedsGuests: (bedrooms: number, capacity: number) =>
       `${bedrooms} bed · ${capacity} guests`,
     title: "Apartments",
@@ -691,6 +725,9 @@ export const en: Dictionary = {
   },
 
   guests: {
+    countOfTotal: (shown: number, total: number) => `${shown} of ${total} profiles`,
+    completedAndUpcoming: "completed and upcoming",
+    acrossAllBookings: "across all bookings",
     title: "Guests",
     description: "Everyone who has stayed with you, and what they are worth.",
     addGuest: "Add guest",
@@ -754,6 +791,10 @@ export const en: Dictionary = {
   },
 
   invoices: {
+    newBookingInvoice: "New booking invoice",
+    unitPrice: "Unit price",
+    stillToCollect: "still to collect",
+    pastDueDate: "past the due date",
     title: "Invoices",
     description: "Documents issued in the selected period.",
     searchInvoices: "Search invoices",
@@ -787,6 +828,11 @@ export const en: Dictionary = {
   },
 
   payments: {
+    largestOutstanding: "Largest outstanding balances",
+    largestOutstandingHint: "Bookings with money still to collect, across all periods.",
+    inThisPeriod: "in this period",
+    stillOwedOnStays: "still owed on stays in this period",
+    fromBankOrTerminal: "From the bank or card terminal. A receipt number is assigned automatically.",
     title: "Payments",
     description: "Everything collected in the selected period.",
     recordPayment: "Record payment",
@@ -818,6 +864,7 @@ export const en: Dictionary = {
   },
 
   expenses: {
+    shareOfRevenue: "expenses as a share of revenue",
     title: "Expenses",
     description: "What the portfolio cost in the selected period.",
     recordExpense: "Record expense",
@@ -857,6 +904,11 @@ export const en: Dictionary = {
   },
 
   reports: {
+    thisPeriod: "This period",
+    lastYear: "Last year",
+    occupancyAdrNote: "Occupancy shown as a percentage; ADR gets its own chart to avoid a second axis.",
+    withStayInPeriod: "with a stay in this period",
+    perGuest: "per guest",
     exportCsv: "Export CSV",
     savePdf: "Save as PDF",
     title: "Reports",
@@ -923,6 +975,7 @@ export const en: Dictionary = {
   },
 
   auth: {
+    emailPlaceholder: "you@company.com",
     signInSubtitle: "Manage reservations, occupancy and revenue across your portfolio.",
     sessionNote: "Sessions are managed by Supabase Auth and refreshed automatically. Every request is scoped to your organisation by row-level security.",
     heroTitle: "Every apartment, every night, every euro — in one place.",
@@ -946,6 +999,7 @@ export const en: Dictionary = {
   },
 
   listing: {
+    openInMaps: "Open in Maps",
     unavailable: "Listing unavailable",
     unavailableHint: "This link is no longer active. Ask the owner for a new one.",
     loading: "Loading",
@@ -1026,6 +1080,9 @@ export const en: Dictionary = {
   },
 
   printReport: {
+    spanningNote: "* Stay spanning the period: nights and revenue shown are this period's; paid and balance are for the whole booking.",
+    colNightsPeriod: "Nights",
+    colRevenuePeriod: "Period revenue",
     scope: "Scope",
     allApartments: "All apartments",
     scopedTo: "Scope",
@@ -1046,7 +1103,7 @@ export const en: Dictionary = {
     occupancy: "Occupancy rate",
     adr: "Average daily rate (ADR)",
     revpar: "RevPAR",
-    bookingCount: "Bookings",
+    bookingCount: "Arrivals in period",
     bookingsTable: "BOOKINGS DETAIL",
     expensesTable: "EXPENSES DETAIL",
     colRef: "Ref.",
@@ -1069,7 +1126,82 @@ export const en: Dictionary = {
     footer: (company: string) => `${company} — automatically generated document.`,
   },
 
+  alerts: {
+    checkoutOverdue: "Check-out not recorded",
+    checkoutToday: "Check-out due today",
+    checkinMissed: "Check-in not recorded",
+    balanceAfterStay: "Balance unpaid after the stay",
+    invoiceOverdue: "Invoice overdue",
+    bookingLine: (guest: string, apartment: string, reference: string) =>
+      `${guest} · ${apartment} · ${reference}`,
+    invoiceLine: (number: string, guest: string) => `${number} · ${guest}`,
+    needsAction: "Needs action",
+    allClear: "Nothing needs action.",
+  },
+
+  validation: {
+    billTypeRequired: "Choose the bill type",
+    useDatePicker: "Use the date picker to choose a date",
+    enterAmount: "Enter an amount",
+    amountsInCents: "Amounts are stored in cents",
+    cannotBeNegative: "Cannot be negative",
+    chooseApartment: "Choose an apartment",
+    chooseGuest: "Choose a guest",
+    atLeastOneAdult: "At least one adult",
+    checkOutAfterCheckIn: "Check-out must be after check-in",
+    firstNameRequired: "First name is required",
+    lastNameRequired: "Last name is required",
+    validEmail: "Enter a valid email",
+    codeRequired: "Code is required",
+    nameRequired: "Name is required",
+    atLeastOneGuest: "At least one guest",
+    amountAboveZero: "Enter an amount above zero",
+    describeLine: "Describe the line item",
+    quantityAboveZero: "Quantity must be above zero",
+    atLeastOneLine: "Add at least one line item",
+    taskTitleRequired: "Give the task a title",
+    companyNameRequired: "Company name is required",
+    currencyCode3: "Use a 3-letter currency code",
+    atLeast8Chars: "Use at least 8 characters",
+    passwordsMismatch: "Passwords do not match",
+    enterPassword: "Enter your password",
+  },
+
+  setup: {
+    notConfiguredTitle: "Supabase is not configured",
+    noDatabaseOne: "The app has no database to talk to, so it has not started. Add the missing variable below and rebuild.",
+    noDatabaseMany: "The app has no database to talk to, so it has not started. Add the missing variables below and rebuild.",
+    createEnvFile: "Create",
+    inProjectRoot: "in the project root:",
+    bothComeFrom: "Both come from",
+    useAnonKey: "Use the",
+    neverServiceRole: "never",
+    serviceRoleWarning: "which bypasses row-level security and would be shipped to every browser.",
+    inlinedAtBuild: "These are inlined at build time, so rebuild after adding them.",
+    fullWalkthrough: "Full walkthrough in",
+  },
+
+  billType: {
+    electricity: "Electricity",
+    water: "Water",
+    internet: "Internet",
+    syndic: "Building management",
+    tax: "VAT / Tax",
+    label: "Bill type",
+    required: "Choose the bill type",
+    document: "Document",
+    documentHint: "PDF or photo of the bill, 8 MB maximum",
+    uploadDocument: "Attach a document",
+    replaceDocument: "Replace",
+    removeDocument: "Remove",
+    openDocument: "Open",
+    uploading: "Uploading…",
+    uploadFailed: "Upload failed",
+    linkExpired: "Could not open the document",
+  },
+
   ui: {
+    noPriorData: "no prior data",
     chartView: "Chart",
     tableView: "Table",
     noDataInPeriod: "No data in this period.",
@@ -1110,6 +1242,7 @@ export const en: Dictionary = {
   },
 
   workspace: {
+    switchCompanyLabel: (name: string) => `Current company: ${name}. Switch company`,
     createCompany: "Create company",
     createCompanyHint: "Manage a second portfolio separately",
     createCompanyDescription: "A separate set of books — its own currency, tax settings, invoice numbering and staff.",

@@ -280,7 +280,7 @@ export function BookingDrawer({
 
               <div className="sm:col-span-2">
                 <h4 className="mb-2 text-[12px] font-medium uppercase tracking-wide text-ink-3">
-                  Price breakdown
+                  {t.bookings.priceBreakdown}
                 </h4>
                 <dl className="space-y-1.5 rounded-xl border border-line p-3.5 text-[13px]">
                   <PriceRow
@@ -312,7 +312,7 @@ export function BookingDrawer({
               {booking.notes ? (
                 <div className="sm:col-span-2">
                   <h4 className="mb-1.5 text-[12px] font-medium uppercase tracking-wide text-ink-3">
-                    Guest notes
+                    {t.bookings.guestNotes}
                   </h4>
                   <p className="rounded-xl bg-surface-2 px-3.5 py-3 text-[13px] leading-relaxed text-ink-2">
                     {booking.notes}

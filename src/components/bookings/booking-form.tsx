@@ -279,7 +279,7 @@ export function BookingFormDrawer({
         footer={
           <>
             <Button variant="ghost" onClick={onClose}>
-              Cancel
+              {t.common.cancel}
             </Button>
             <Button
               variant="primary"

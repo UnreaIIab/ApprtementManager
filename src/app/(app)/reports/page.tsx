@@ -106,12 +106,18 @@ export default function ReportsPage() {
     return computeSeasonality(input, years);
   }, [input, range]);
 
+  /*
+   * Overlap, not arrival. A stay that began last month and is still running
+   * earns revenue in this one — `computeKpis` counts those nights — so
+   * filtering on the arrival date dropped it from the detail while leaving its
+   * money in the summary, and the two stopped reconciling.
+   */
   const inRangeBookings = useMemo(
     () =>
       bookings.filter(
         (b) =>
-          b.check_in >= range.start &&
           b.check_in <= range.end &&
+          b.check_out > range.start &&
           (!scopeId || b.apartment_id === scopeId),
       ),
     [bookings, range, scopeId],
@@ -215,7 +221,7 @@ export default function ReportsPage() {
   const apartmentColumns: Column<ApartmentPerformance>[] = [
     {
       key: "apartment",
-      header: "Apartment",
+      header: t.change.apartment,
       sortValue: (row) => row.apartment.name,
       cell: (row) => (
         <span className="block">
@@ -226,21 +232,21 @@ export default function ReportsPage() {
     },
     {
       key: "revenue",
-      header: "Revenue",
+      header: t.dashboard.revenue,
       align: "right",
       sortValue: (row) => row.revenue,
       cell: (row) => <span className="font-medium text-ink tnum">{money(row.revenue)}</span>,
     },
     {
       key: "expenses",
-      header: "Expenses",
+      header: t.dashboard.expenses,
       align: "right",
       sortValue: (row) => row.expenses,
       cell: (row) => <span className="text-ink-2 tnum">{money(row.expenses)}</span>,
     },
     {
       key: "profit",
-      header: "Profit",
+      header: t.dashboard.profit,
       align: "right",
       sortValue: (row) => row.profit,
       cell: (row) => (
@@ -251,7 +257,7 @@ export default function ReportsPage() {
     },
     {
       key: "margin",
-      header: "Margin",
+      header: t.dashboard.margin,
       align: "right",
       secondary: true,
       sortValue: (row) => row.margin,
@@ -259,28 +265,28 @@ export default function ReportsPage() {
     },
     {
       key: "occupancy",
-      header: "Occupancy",
+      header: t.dashboard.occupancy,
       align: "right",
       sortValue: (row) => row.occupancy,
       cell: (row) => <span className="text-ink tnum">{percent(row.occupancy, 0)}</span>,
     },
     {
       key: "adr",
-      header: "ADR",
+      header: t.dashboard.adr,
       align: "right",
       sortValue: (row) => row.adr,
       cell: (row) => <span className="text-ink-2 tnum">{money(row.adr, { cents: false })}</span>,
     },
     {
       key: "revpar",
-      header: "RevPAR",
+      header: t.dashboard.revpar,
       align: "right",
       sortValue: (row) => row.revpar,
       cell: (row) => <span className="text-ink-2 tnum">{money(row.revpar, { cents: false })}</span>,
     },
     {
       key: "bookings",
-      header: "Bookings",
+      header: t.dashboard.bookings,
       align: "right",
       secondary: true,
       sortValue: (row) => row.bookings,
@@ -509,13 +515,13 @@ export default function ReportsPage() {
                         Metric
                       </th>
                       <th scope="col" className="py-2 text-right text-[11px] font-medium uppercase tracking-wide text-ink-3">
-                        This period
+                        {t.reports.thisPeriod}
                       </th>
                       <th scope="col" className="py-2 text-right text-[11px] font-medium uppercase tracking-wide text-ink-3">
                         Previous
                       </th>
                       <th scope="col" className="py-2 text-right text-[11px] font-medium uppercase tracking-wide text-ink-3">
-                        Last year
+                        {t.reports.lastYear}
                       </th>
                     </tr>
                   </thead>
@@ -796,10 +802,10 @@ export default function ReportsPage() {
       {report === "guests" ? (
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <KpiCard label={t.reports.uniqueGuests} value={number(guestStats.unique)} hint="with a stay in this period" />
+            <KpiCard label={t.reports.uniqueGuests} value={number(guestStats.unique)} hint={t.reports.withStayInPeriod} />
             <KpiCard label={t.reports.repeatGuests} value={number(guestStats.repeat)} hint="more than one stay" />
             <KpiCard label={t.reports.repeatRate} value={percent(guestStats.repeatRate)} />
-            <KpiCard label={t.reports.averageSpend} value={money(guestStats.avgSpend, { cents: false })} hint="per guest" />
+            <KpiCard label={t.reports.averageSpend} value={money(guestStats.avgSpend, { cents: false })} hint={t.reports.perGuest} />
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
@@ -895,7 +901,7 @@ export default function ReportsPage() {
 
           <ChartCard
             title={t.reports.occupancyAndRate}
-            description="Occupancy shown as a percentage; ADR gets its own chart to avoid a second axis."
+            description={t.reports.occupancyAdrNote}
             isEmpty={seasonality.every((point) => point.occupancy === 0)}
             table={
               <ChartTable
@@ -944,13 +950,13 @@ export default function ReportsPage() {
             columns={[
               {
                 key: "reference",
-                header: "Booking",
+                header: t.bookings.colBooking,
                 sortValue: (row) => row.reference,
                 cell: (row) => <span className="font-medium text-ink">{row.reference}</span>,
               },
               {
                 key: "guest",
-                header: "Guest",
+                header: t.bookings.colGuest,
                 sortValue: (row) => row.guest.last_name,
                 cell: (row) => (
                   <span className="text-ink">
@@ -960,7 +966,7 @@ export default function ReportsPage() {
               },
               {
                 key: "apartment",
-                header: "Apartment",
+                header: t.change.apartment,
                 sortValue: (row) => row.apartment.name,
                 cell: (row) => <span className="text-ink-2">{row.apartment.name}</span>,
               },
@@ -972,13 +978,13 @@ export default function ReportsPage() {
               },
               {
                 key: "status",
-                header: "Status",
+                header: t.common.status,
                 sortValue: (row) => row.status,
                 cell: (row) => <StatusBadge size="sm" meta={BOOKING_STATUS_META[row.status]} />,
               },
               {
                 key: "reason",
-                header: "Reason",
+                header: t.expenses.reason,
                 secondary: true,
                 cell: (row) => (
                   <span className="text-ink-2">{row.cancellation_reason ?? "—"}</span>
@@ -1016,7 +1022,7 @@ export default function ReportsPage() {
             columns={[
               {
                 key: "type",
-                header: "Type",
+                header: t.guests.idType,
                 sortValue: (row) => row.type,
                 cell: (row) => (
                   <span className="flex items-center gap-2 text-ink">
@@ -1031,38 +1037,38 @@ export default function ReportsPage() {
               },
               {
                 key: "title",
-                header: "Task",
+                header: t.apartments.task,
                 sortValue: (row) => row.title,
                 cell: (row) => <span className="text-ink">{row.title}</span>,
               },
               {
                 key: "apartment",
-                header: "Apartment",
+                header: t.change.apartment,
                 sortValue: (row) => row.apartment?.name ?? "",
                 cell: (row) => <span className="text-ink-2">{row.apartment?.name ?? "—"}</span>,
               },
               {
                 key: "assignee",
-                header: "Assignee",
+                header: t.reports.assignee,
                 secondary: true,
                 sortValue: (row) => row.assignee ?? "",
                 cell: (row) => <span className="text-ink-2">{row.assignee ?? "—"}</span>,
               },
               {
                 key: "due",
-                header: "Due",
+                header: t.invoices.due,
                 sortValue: (row) => row.due_date ?? "",
                 cell: (row) => <span className="text-ink tnum">{row.due_date ?? "—"}</span>,
               },
               {
                 key: "status",
-                header: "Status",
+                header: t.common.status,
                 sortValue: (row) => row.status,
                 cell: (row) => <StatusBadge size="sm" meta={TASK_STATUS_META[row.status]} />,
               },
               {
                 key: "cost",
-                header: "Cost",
+                header: t.expenses.taskCost,
                 align: "right",
                 sortValue: (row) => row.cost,
                 cell: (row) => <span className="text-ink tnum">{money(row.cost)}</span>,

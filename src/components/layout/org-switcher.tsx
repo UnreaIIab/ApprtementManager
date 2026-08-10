@@ -54,7 +54,7 @@ export function OrgSwitcher() {
             onClick={toggle}
             aria-haspopup="menu"
             aria-expanded={open}
-            aria-label={`Current company: ${active.name}. Switch company`}
+            aria-label={t.workspace.switchCompanyLabel(active.name)}
             className="flex h-9 items-center gap-2 rounded-xl px-2.5 text-[13px] font-medium text-ink transition-colors hover:bg-surface-3"
           >
             <Building2 className="size-4 shrink-0 text-ink-3" aria-hidden />
@@ -133,10 +133,10 @@ function CreateCompanyDialog({ open, onClose }: { open: boolean; onClose: () => 
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>
-            Cancel
+            {t.common.cancel}
           </Button>
           <Button variant="primary" onClick={submit} loading={createWorkspace.isPending}>
-            Create company
+            {t.workspace.createCompany}
           </Button>
         </>
       }

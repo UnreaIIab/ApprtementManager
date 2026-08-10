@@ -164,7 +164,7 @@ function PaymentsView() {
   const columns: Column<PaymentWithRelations>[] = [
     {
       key: "paid_at",
-      header: "Date",
+      header: t.common.date,
       sortValue: (row) => row.paid_at,
       cell: (row) => (
         <span className="whitespace-nowrap text-ink tnum">{formatDate(row.paid_at)}</span>
@@ -172,7 +172,7 @@ function PaymentsView() {
     },
     {
       key: "receipt",
-      header: "Receipt",
+      header: t.payments.receipt,
       sortValue: (row) => row.receipt_number ?? "",
       cell: (row) => (
         <span className="font-medium text-ink tnum">{row.receipt_number ?? "—"}</span>
@@ -180,7 +180,7 @@ function PaymentsView() {
     },
     {
       key: "guest",
-      header: "Guest",
+      header: t.bookings.colGuest,
       sortValue: (row) => (row.guest ? row.guest.last_name : ""),
       cell: (row) =>
         row.guest ? (
@@ -193,7 +193,7 @@ function PaymentsView() {
     },
     {
       key: "booking",
-      header: "Booking",
+      header: t.bookings.colBooking,
       sortValue: (row) => row.booking?.reference ?? "",
       cell: (row) =>
         row.booking ? (
@@ -209,20 +209,20 @@ function PaymentsView() {
     },
     {
       key: "apartment",
-      header: "Apartment",
+      header: t.change.apartment,
       secondary: true,
       sortValue: (row) => row.apartment?.name ?? "",
       cell: (row) => <span className="text-ink-2">{row.apartment?.name ?? "—"}</span>,
     },
     {
       key: "method",
-      header: "Method",
+      header: t.payments.method,
       sortValue: (row) => row.method,
       cell: (row) => <span className="text-ink-2">{PAYMENT_METHOD_LABELS[row.method]}</span>,
     },
     {
       key: "reference",
-      header: "Reference",
+      header: t.payments.reference,
       secondary: true,
       sortValue: (row) => row.reference ?? "",
       cell: (row) => (
@@ -234,13 +234,13 @@ function PaymentsView() {
     },
     {
       key: "status",
-      header: "Status",
+      header: t.common.status,
       sortValue: (row) => row.status,
       cell: (row) => <StatusBadge size="sm" meta={PAYMENT_STATUS_META[row.status]} />,
     },
     {
       key: "amount",
-      header: "Amount",
+      header: t.common.amount,
       align: "right",
       sortValue: (row) => row.amount,
       cell: (row) => (
@@ -301,10 +301,10 @@ function PaymentsView() {
         actions={
           <>
             <Button variant="outline" icon={<Download className="size-4" />} onClick={() => exportRows(filtered)}>
-              Export
+              {t.common.export}
             </Button>
             <Button variant="primary" icon={<Plus className="size-4" />} onClick={() => setDialogOpen(true)}>
-              Record payment
+              {t.bookings.recordPayment}
             </Button>
           </>
         }
@@ -317,12 +317,12 @@ function PaymentsView() {
           delta={delta("collected")}
           icon={<Wallet />}
         />
-        <KpiCard label={t.payments.refunded} value={money(totals.refunded, { cents: false })} hint="in this period" />
+        <KpiCard label={t.payments.refunded} value={money(totals.refunded, { cents: false })} hint={t.payments.inThisPeriod} />
         <KpiCard label={t.payments.netCashIn} value={money(totals.net, { cents: false })} hint="collected minus refunds" />
         <KpiCard
           label={t.invoices.outstanding}
           value={money(kpis.outstanding, { cents: false })}
-          hint="still owed on stays in this period"
+          hint={t.payments.stillOwedOnStays}
           href="/invoices"
         />
       </div>
@@ -411,10 +411,10 @@ function PaymentsView() {
         <div className="mb-5 overflow-hidden rounded-card border border-line bg-surface">
           <div className="border-b border-line px-5 py-3.5 sm:px-6">
             <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-ink">
-              Largest outstanding balances
+              {t.payments.largestOutstanding}
             </h2>
             <p className="mt-0.5 text-[13px] text-ink-2">
-              Bookings with money still to collect, across all periods.
+              {t.payments.largestOutstandingHint}
             </p>
           </div>
           <ul className="divide-y divide-line">
@@ -509,7 +509,7 @@ function PaymentsView() {
             icon={<Download className="size-3.5" />}
             onClick={() => exportRows(filtered.filter((row) => ids.includes(row.id)))}
           >
-            Export selected
+            {t.common.exportSelected}
           </Button>
         )}
         footer={

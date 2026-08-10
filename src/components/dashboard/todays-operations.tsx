@@ -181,12 +181,12 @@ function BookingList({
               <span className="text-[13px] font-medium text-ink-2 tnum">{time}</span>
               {kind === "arrivals" && booking.status !== "checked_in" ? (
                 <Button size="sm" variant="primary" onClick={() => onCheckIn(booking)}>
-                  Check in
+                  {t.bookings.checkInAction}
                 </Button>
               ) : null}
               {kind === "departures" && booking.status === "checked_in" ? (
                 <Button size="sm" variant="outline" onClick={() => onCheckOut(booking)}>
-                  Check out
+                  {t.bookings.checkOutAction}
                 </Button>
               ) : null}
             </div>

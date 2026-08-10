@@ -8,7 +8,7 @@ import { dayjs, eachDay, toISODate } from "@/lib/date-range";
 import { useT } from "@/i18n";
 import { formatDate, fullName, money, percent, number } from "@/lib/format";
 import {
-  APARTMENT_STATUS_META, BOOKING_STATUS_META, EXPENSE_CATEGORY_LABELS,
+  APARTMENT_STATUS_META, BOOKING_STATUS_META, expenseCategoryLabel,
   TASK_STATUS_META, categoryColor,
 } from "@/lib/constants";
 import { capSlices, computeOccupancyByDay, expensesByCategory } from "@/data/analytics";
@@ -162,7 +162,7 @@ export default function ApartmentProfilePage({
   const bookingColumns: Column<BookingWithRelations>[] = [
     {
       key: "reference",
-      header: "Booking",
+      header: t.bookings.colBooking,
       sortValue: (row) => row.reference,
       cell: (row) => (
         <Link href={`/bookings?booking=${row.id}`} className="font-medium text-ink hover:underline">
@@ -172,13 +172,13 @@ export default function ApartmentProfilePage({
     },
     {
       key: "guest",
-      header: "Guest",
+      header: t.bookings.colGuest,
       sortValue: (row) => row.guest.last_name,
       cell: (row) => <span className="text-ink">{fullName(row.guest)}</span>,
     },
     {
       key: "stay",
-      header: "Stay",
+      header: t.bookings.colStay,
       sortValue: (row) => row.check_in,
       cell: (row) => (
         <span className="whitespace-nowrap text-ink tnum">
@@ -188,20 +188,20 @@ export default function ApartmentProfilePage({
     },
     {
       key: "nights",
-      header: "Nights",
+      header: t.printReport.colNights,
       align: "right",
       sortValue: (row) => row.nights,
       cell: (row) => <span className="text-ink-2 tnum">{row.nights}</span>,
     },
     {
       key: "status",
-      header: "Status",
+      header: t.common.status,
       sortValue: (row) => row.status,
       cell: (row) => <StatusBadge size="sm" meta={BOOKING_STATUS_META[row.status]} />,
     },
     {
       key: "total",
-      header: "Total",
+      header: t.common.total,
       align: "right",
       sortValue: (row) => row.total,
       cell: (row) => <span className="font-medium text-ink tnum">{money(row.total)}</span>,
@@ -211,13 +211,13 @@ export default function ApartmentProfilePage({
   const expenseColumns: Column<ExpenseWithRelations>[] = [
     {
       key: "date",
-      header: "Date",
+      header: t.common.date,
       sortValue: (row) => row.expense_date,
       cell: (row) => <span className="text-ink tnum">{formatDate(row.expense_date)}</span>,
     },
     {
       key: "category",
-      header: "Category",
+      header: t.dashboard.categoryCol,
       sortValue: (row) => row.category,
       cell: (row) => (
         <span className="flex items-center gap-2 text-ink">
@@ -226,26 +226,26 @@ export default function ApartmentProfilePage({
             className="size-2 rounded-full"
             style={{ background: categoryColor(row.category) }}
           />
-          {EXPENSE_CATEGORY_LABELS[row.category]}
+          {expenseCategoryLabel(row.category)}
         </span>
       ),
     },
     {
       key: "vendor",
-      header: "Vendor",
+      header: t.expenses.vendor,
       secondary: true,
       sortValue: (row) => row.vendor ?? "",
       cell: (row) => <span className="text-ink-2">{row.vendor ?? "—"}</span>,
     },
     {
       key: "description",
-      header: "Description",
+      header: t.expenses.description2,
       secondary: true,
       cell: (row) => <span className="text-ink-2">{row.description ?? "—"}</span>,
     },
     {
       key: "amount",
-      header: "Amount",
+      header: t.common.amount,
       align: "right",
       sortValue: (row) => row.amount,
       cell: (row) => <span className="font-medium text-ink tnum">{money(row.amount)}</span>,
@@ -255,7 +255,7 @@ export default function ApartmentProfilePage({
   const taskColumns: Column<TaskWithRelations>[] = [
     {
       key: "title",
-      header: "Task",
+      header: t.apartments.task,
       sortValue: (row) => row.title,
       cell: (row) => (
         <span className="flex items-center gap-2">
@@ -273,19 +273,19 @@ export default function ApartmentProfilePage({
     },
     {
       key: "due",
-      header: "Due",
+      header: t.invoices.due,
       sortValue: (row) => row.due_date ?? "",
       cell: (row) => <span className="text-ink tnum">{formatDate(row.due_date)}</span>,
     },
     {
       key: "status",
-      header: "Status",
+      header: t.common.status,
       sortValue: (row) => row.status,
       cell: (row) => <StatusBadge size="sm" meta={TASK_STATUS_META[row.status]} />,
     },
     {
       key: "cost",
-      header: "Cost",
+      header: t.expenses.taskCost,
       align: "right",
       sortValue: (row) => row.cost,
       cell: (row) => <span className="text-ink tnum">{money(row.cost)}</span>,
@@ -343,7 +343,7 @@ export default function ApartmentProfilePage({
               icon={<Pencil className="size-4" />}
               onClick={() => setEditOpen(true)}
             >
-              Edit
+              {t.common.edit}
             </Button>
           </>
         }
@@ -395,17 +395,17 @@ export default function ApartmentProfilePage({
           />
           <KpiCard label={t.dashboard.occupancy} value={percent(performance?.occupancy ?? 0)} hint={`${performance?.nightsSold ?? 0} nights sold`} />
           <KpiCard label={t.dashboard.adr} value={money(performance?.adr ?? 0, { cents: false })} hint="average daily rate" />
-          <KpiCard label={t.dashboard.revpar} value={money(performance?.revpar ?? 0, { cents: false })} hint="per available night" />
-          <KpiCard label={t.dashboard.bookings} value={number(performance?.bookings ?? 0)} hint="arrivals in period" />
+          <KpiCard label={t.dashboard.revpar} value={money(performance?.revpar ?? 0, { cents: false })} hint={t.apartments.perAvailableNight} />
+          <KpiCard label={t.dashboard.bookings} value={number(performance?.bookings ?? 0)} hint={t.apartments.arrivalsInPeriod} />
           <KpiCard
             label={t.guests.averageStay}
             value={`${(performance?.avgStay ?? 0).toFixed(1)}n`}
-            hint="nights per booking"
+            hint={t.apartments.nightsPerBooking}
           />
           <KpiCard
             label={t.guests.cancellationRate}
             value={percent(performance?.cancellationRate ?? 0, 0)}
-            hint="of arrivals in period"
+            hint={t.apartments.ofArrivalsInPeriod}
           />
         </div>
       </div>
@@ -490,7 +490,7 @@ export default function ApartmentProfilePage({
         <div className="grid gap-4 lg:grid-cols-2">
           <ChartCard
             title={t.dashboard.nightsSold}
-            description={`Occupied nights across ${label.toLowerCase()}.`}
+            description={t.apartments.occupiedNightsAcross(label.toLowerCase())}
             isEmpty={unitTrend.every((point) => point.nights === 0)}
             table={
               <ChartTable
@@ -593,7 +593,7 @@ export default function ApartmentProfilePage({
         <Card>
           <CardHeader
             title={t.apartments.tabAvailability}
-            description={`Occupied nights in ${label.toLowerCase()}. Darker means booked.`}
+            description={t.apartments.occupiedNightsIn(label.toLowerCase())}
             action={<HeatLegend />}
           />
           <CardBody>
@@ -715,7 +715,7 @@ export default function ApartmentProfilePage({
         <Card>
           <CardHeader
             title={t.apartments.photos}
-            description="These appear on the shared listing page. The cover is what a client sees first, and what WhatsApp shows in its link preview."
+            description={t.apartments.photosHint}
           />
           <CardBody>
             <ImageUploader

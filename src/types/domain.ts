@@ -75,7 +75,7 @@ export const INVOICE_STATUSES = [
 export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
 
 export const EXPENSE_CATEGORIES = [
-  "utilities",
+  "bills",
   "cleaning",
   "maintenance",
   "repairs",
@@ -89,6 +89,20 @@ export const EXPENSE_CATEGORIES = [
   "other",
 ] as const;
 export type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[number];
+
+/**
+ * What a bill is for. Only meaningful when the category is `bills`, which the
+ * database enforces with a check constraint.
+ */
+export const BILL_TYPES = [
+  "electricity",
+  "water",
+  "internet",
+  "syndic",
+  "tax",
+] as const;
+
+export type BillType = (typeof BILL_TYPES)[number];
 
 export const TASK_TYPES = ["cleaning", "maintenance"] as const;
 export type TaskType = (typeof TASK_TYPES)[number];
@@ -309,6 +323,8 @@ export interface Expense {
   apartment_id: UUID | null;
   booking_id: UUID | null;
   category: ExpenseCategory;
+  /** Set only for `bills`; null for every other category. */
+  bill_type: BillType | null;
   vendor: string | null;
   description: string | null;
   amount: number;
@@ -369,6 +385,13 @@ export interface ActivityEntry {
 export interface AppNotification {
   id: UUID;
   org_id: UUID;
+  /**
+   * Names the *condition*, not the occurrence — `checkout:<booking id>`. The
+   * scheduled job uses it to avoid inserting the same alert every hour, and the
+   * bell uses it to recognise a stored row as something it is already showing
+   * from live data.
+   */
+  dedupe_key: string | null;
   type: string;
   title: string;
   body: string | null;

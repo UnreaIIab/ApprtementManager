@@ -76,7 +76,7 @@ export function DateFilter({ className }: { className?: string }) {
         footer={
           <>
             <Button variant="ghost" onClick={() => setCustomOpen(false)}>
-              Cancel
+              {t.common.cancel}
             </Button>
             <Button
               variant="primary"

@@ -124,7 +124,7 @@ export function ApartmentFormDrawer({
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>
-            Cancel
+            {t.common.cancel}
           </Button>
           <Button variant="primary" onClick={onSubmit} loading={isSubmitting}>
             {editing ? t.common.saveChanges : t.apartments.addApartment}
@@ -247,12 +247,10 @@ export function ApartmentFormDrawer({
 
         <fieldset className="rounded-xl border border-line p-4">
           <legend className="px-1.5 text-[12px] font-medium uppercase tracking-wide text-ink-3">
-            Map location
+            {t.apartments.mapLocation}
           </legend>
           <p className="mb-3 text-[12px] leading-relaxed text-ink-3">
-            Optional. Adding coordinates puts a map on the shared listing page;
-            without them it falls back to searching the address by name. In Google
-            Maps, right-click the building and click the numbers to copy them.
+            {t.apartments.coordinatesHint}
           </p>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label={t.apartments.latitude} error={errors.latitude?.message} htmlFor="apt-lat">

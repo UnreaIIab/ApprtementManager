@@ -100,10 +100,10 @@ export function PaymentDialog({
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>
-            Cancel
+            {t.common.cancel}
           </Button>
           <Button variant="primary" onClick={onSubmit} loading={isSubmitting}>
-            Record payment
+            {t.bookings.recordPayment}
           </Button>
         </>
       }
@@ -166,7 +166,7 @@ export function PaymentDialog({
 
         <Field
           label={t.payments.transactionReference}
-          hint="From the bank or card terminal. A receipt number is assigned automatically."
+          hint={t.payments.fromBankOrTerminal}
           htmlFor="pay-ref"
         >
           <Input id="pay-ref" placeholder="TXN-123456" {...register("reference")} />

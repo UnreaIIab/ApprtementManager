@@ -124,7 +124,7 @@ function GuestsView() {
   const columns: Column<Row>[] = [
     {
       key: "name",
-      header: "Guest",
+      header: t.bookings.colGuest,
       sortValue: (row) => `${row.guest.last_name} ${row.guest.first_name}`,
       cell: (row) => (
         <span className="flex items-center gap-2.5">
@@ -150,28 +150,28 @@ function GuestsView() {
     },
     {
       key: "nationality",
-      header: "Nationality",
+      header: t.guests.nationality,
       secondary: true,
       sortValue: (row) => row.guest.nationality ?? "",
       cell: (row) => <span className="text-ink-2">{row.guest.nationality ?? "—"}</span>,
     },
     {
       key: "phone",
-      header: "Phone",
+      header: t.common.phone,
       secondary: true,
       sortValue: (row) => row.guest.phone ?? "",
       cell: (row) => <span className="text-ink-2 tnum">{row.guest.phone ?? "—"}</span>,
     },
     {
       key: "stays",
-      header: "Stays",
+      header: t.ui.stays,
       align: "right",
       sortValue: (row) => row.stats.stays,
       cell: (row) => <span className="text-ink tnum">{row.stats.stays}</span>,
     },
     {
       key: "nights",
-      header: "Nights",
+      header: t.printReport.colNights,
       align: "right",
       secondary: true,
       sortValue: (row) => row.stats.nights,
@@ -186,7 +186,7 @@ function GuestsView() {
     },
     {
       key: "balance",
-      header: "Outstanding",
+      header: t.invoices.outstanding,
       align: "right",
       sortValue: (row) => row.stats.balance,
       cell: (row) => (
@@ -247,7 +247,7 @@ function GuestsView() {
     <>
       <PageHeader
         title={t.guests.title}
-        description={`${rows.length} of ${guests.length} profiles`}
+        description={t.guests.countOfTotal(rows.length, guests.length)}
         actions={
           <>
             <Button
@@ -255,7 +255,7 @@ function GuestsView() {
               icon={<Download className="size-4" />}
               onClick={() => exportRows(rows)}
             >
-              Export
+              {t.common.export}
             </Button>
             <Button variant="primary" icon={<Plus className="size-4" />} onClick={() => setAddOpen(true)}>
               Add guest
@@ -311,7 +311,7 @@ function GuestsView() {
             icon={<Download className="size-3.5" />}
             onClick={() => exportRows(rows.filter((row) => ids.includes(row.guest.id)))}
           >
-            Export selected
+            {t.common.exportSelected}
           </Button>
         )}
       />

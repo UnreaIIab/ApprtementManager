@@ -1,6 +1,7 @@
 import { downloadBlob } from "@/lib/utils";
 import { fullName } from "@/lib/format";
-import { EXPENSE_CATEGORY_LABELS } from "@/lib/constants";
+import { expenseCategoryLabel } from "@/lib/constants";
+import { bookingPeriodShare } from "@/data/analytics";
 import { strings } from "@/i18n";
 import type {
   Apartment,
@@ -58,9 +59,12 @@ export function buildReportCsv({
 
   // Same exclusions as the printed sheet, for the same reason: the detail has
   // to substantiate the summary above it.
+  // Prorated to the period, exactly as the printed sheet does it.
   const live = bookings
     .filter((b) => b.status !== "cancelled" && b.status !== "no_show")
-    .sort((a, b) => a.check_in.localeCompare(b.check_in));
+    .map((booking) => ({ booking, share: bookingPeriodShare(booking, range) }))
+    .filter((entry) => entry.share.nights > 0)
+    .sort((a, b) => a.booking.check_in.localeCompare(b.booking.check_in));
   const costs = [...expenses].sort((a, b) =>
     a.expense_date.localeCompare(b.expense_date),
   );
@@ -90,14 +94,11 @@ export function buildReportCsv({
   lines.push(
     row(pct(r.margin), kpis.revenue ? ((kpis.netProfit / kpis.revenue) * 100).toFixed(1) : ""),
   );
-  lines.push(row(r.collected, amount(kpis.collected)));
-  lines.push(row(r.outstanding, amount(kpis.outstanding)));
   lines.push(row(r.bookingCount, kpis.bookings));
   lines.push(row(r.nightsSold, kpis.nightsSold));
   lines.push(row(r.nightsAvailable, kpis.nightsAvailable));
   lines.push(row(pct(r.occupancy), (kpis.occupancyRate * 100).toFixed(1)));
   lines.push(row(r.adr, amount(kpis.adr)));
-  lines.push(row(r.revpar, amount(kpis.revpar)));
   lines.push("");
 
   /* --- Bookings --------------------------------------------------- */
@@ -108,10 +109,10 @@ export function buildReportCsv({
     lines.push(
       row(
         r.colRef, r.colApartment, r.colGuest, r.colCheckIn, r.colCheckOut,
-        r.colNights, r.colTotal, r.colPaid, r.colBalance,
+        r.colNights, r.colRevenuePeriod, r.colPaid, r.colBalance,
       ),
     );
-    for (const booking of live) {
+    for (const { booking, share } of live) {
       lines.push(
         row(
           booking.reference,
@@ -119,8 +120,8 @@ export function buildReportCsv({
           fullName(booking.guest),
           booking.check_in,
           booking.check_out,
-          booking.nights,
-          amount(booking.total),
+          share.nights,
+          amount(share.revenue),
           amount(booking.paid),
           amount(booking.balance),
         ),
@@ -129,10 +130,10 @@ export function buildReportCsv({
     lines.push(
       row(
         r.total, "", "", "", "",
-        live.reduce((s, b) => s + b.nights, 0),
-        amount(live.reduce((s, b) => s + b.total, 0)),
-        amount(live.reduce((s, b) => s + b.paid, 0)),
-        amount(live.reduce((s, b) => s + b.balance, 0)),
+        live.reduce((s, e) => s + e.share.nights, 0),
+        amount(live.reduce((s, e) => s + e.share.revenue, 0)),
+        amount(live.reduce((s, e) => s + e.booking.paid, 0)),
+        amount(live.reduce((s, e) => s + e.booking.balance, 0)),
       ),
     );
   }
@@ -148,7 +149,7 @@ export function buildReportCsv({
       lines.push(
         row(
           expense.expense_date,
-          EXPENSE_CATEGORY_LABELS[expense.category],
+          expenseCategoryLabel(expense.category),
           expense.vendor || expense.description || "",
           expense.apartment?.name ?? "",
           amount(expense.amount),
@@ -162,6 +163,9 @@ export function buildReportCsv({
 
   /* --- Notes ------------------------------------------------------- */
   lines.push("");
+  if (live.some(({ booking }) => booking.check_in < range.start || booking.check_out > range.end)) {
+    lines.push(row(r.spanningNote));
+  }
   lines.push(row(r.cancelledExcluded));
   if (apartment) lines.push(row(r.portfolioWideExcluded));
 

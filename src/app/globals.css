@@ -461,6 +461,10 @@
     break-inside: avoid;
   }
 
+  .ps-mark {
+    font-weight: 700;
+  }
+
   .ps-empty {
     font-style: italic;
     padding: 1.5mm 0;

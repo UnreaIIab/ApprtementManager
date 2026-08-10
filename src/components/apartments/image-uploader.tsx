@@ -149,7 +149,7 @@ export function ImageUploader({
                   onClick={() => inputRef.current?.click()}
                   className="font-medium text-brand hover:underline disabled:no-underline"
                 >
-                  Choose photos
+                  {t.apartments.choosePhotos}
                 </button>{" "}
                 or drag them here
               </>
