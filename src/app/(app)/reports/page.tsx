@@ -107,17 +107,16 @@ export default function ReportsPage() {
   }, [input, range]);
 
   /*
-   * Overlap, not arrival. A stay that began last month and is still running
-   * earns revenue in this one — `computeKpis` counts those nights — so
-   * filtering on the arrival date dropped it from the detail while leaving its
-   * money in the summary, and the two stopped reconciling.
+   * Arrival, not overlap. Revenue is recognised whole on the check-in date, so
+   * the period that owns a booking is the one it arrived in — and the detail
+   * table reconciles with the summary again because both use that rule.
    */
   const inRangeBookings = useMemo(
     () =>
       bookings.filter(
         (b) =>
+          b.check_in >= range.start &&
           b.check_in <= range.end &&
-          b.check_out > range.start &&
           (!scopeId || b.apartment_id === scopeId),
       ),
     [bookings, range, scopeId],
@@ -710,7 +709,6 @@ export default function ReportsPage() {
             columns={apartmentColumns}
             rowKey={(row) => row.apartment.id}
             paginate={false}
-            maxHeight="calc(100dvh - 420px)"
             emptyTitle={t.reports.noApartmentData}
           />
         </div>
@@ -1001,7 +999,6 @@ export default function ReportsPage() {
             rowKey={(row) => row.id}
             emptyTitle={t.reports.noCancellations}
             emptyDescription={t.reports.everyReservationHeld}
-            maxHeight="calc(100dvh - 420px)"
           />
         </div>
       ) : null}
@@ -1076,7 +1073,6 @@ export default function ReportsPage() {
             ]}
             rowKey={(row) => row.id}
             emptyTitle={t.reports.noTasks}
-            maxHeight="calc(100dvh - 420px)"
           />
         </div>
       ) : null}

@@ -59,7 +59,7 @@ export function buildReportCsv({
 
   // Same exclusions as the printed sheet, for the same reason: the detail has
   // to substantiate the summary above it.
-  // Prorated to the period, exactly as the printed sheet does it.
+  // Whole bookings, exactly as the printed sheet lists them.
   const live = bookings
     .filter((b) => b.status !== "cancelled" && b.status !== "no_show")
     .map((booking) => ({ booking, share: bookingPeriodShare(booking, range) }))
@@ -109,7 +109,7 @@ export function buildReportCsv({
     lines.push(
       row(
         r.colRef, r.colApartment, r.colGuest, r.colCheckIn, r.colCheckOut,
-        r.colNights, r.colRevenuePeriod, r.colPaid, r.colBalance,
+        r.colNights, r.colTotal, r.colPaid, r.colBalance,
       ),
     );
     for (const { booking, share } of live) {
@@ -163,9 +163,6 @@ export function buildReportCsv({
 
   /* --- Notes ------------------------------------------------------- */
   lines.push("");
-  if (live.some(({ booking }) => booking.check_in < range.start || booking.check_out > range.end)) {
-    lines.push(row(r.spanningNote));
-  }
   lines.push(row(r.cancelledExcluded));
   if (apartment) lines.push(row(r.portfolioWideExcluded));
 

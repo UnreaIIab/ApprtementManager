@@ -36,10 +36,25 @@ import type {
  * two screens.
  *
  * ## Revenue recognition
- * Revenue is recognised **per night**, not on the booking date. A stay that
- * straddles a month boundary contributes to both months in proportion to the
- * nights that fall in each. This is what makes "This month" mean the same thing
- * on the dashboard, the reports page and an apartment's P&L.
+ * Money is recognised **in full on the check-in date**. A stay that arrives on
+ * 28 August and runs ten nights is entirely August revenue, even though six of
+ * its nights fall in September.
+ *
+ * This is a deliberate departure from hotel accrual accounting, which spreads a
+ * stay across the nights it occupies. Accrual is more precise, and it was what
+ * this engine did — but it meant a booking taken and paid for in August showed
+ * only part of its value in August, which does not match how the business is
+ * actually run or how it is explained to a client. One booking, one month.
+ *
+ * ## What does NOT follow that rule
+ * **Nights sold and occupancy stay physical.** They count the nights actually
+ * inside the window, because they describe whether an apartment was occupied —
+ * a fact about the calendar, not about money. Recognising ten nights in August
+ * for a stay that only occupies four of them would let occupancy exceed 100%.
+ *
+ * Because the two bases differ, **ADR divides by the nights of the bookings
+ * that arrived in the period**, not by nights sold — otherwise it would mix a
+ * check-in-based numerator with a calendar-based denominator and mean nothing.
  *
  * ## Which bookings count
  * Cancelled and no-show bookings never contribute revenue, occupancy, ADR or
@@ -52,35 +67,31 @@ export function isLive(booking: Booking): boolean {
   return LIVE_STATUSES.has(booking.status);
 }
 
-/** Revenue per night of a stay, split into the two bases the KPIs need. */
-function nightlyBases(booking: Booking) {
-  const nights = Math.max(1, booking.nights);
+/** What a stay is worth, recognised whole on its check-in date. */
+function bookingAmounts(booking: Booking) {
   return {
-    // Accommodation only — the correct denominator basis for ADR and RevPAR.
-    room: (booking.subtotal - booking.discount) / nights,
+    // Accommodation only — the correct numerator for ADR.
+    room: booking.subtotal - booking.discount,
     // Everything the guest owes, which is what "Total revenue" reports.
-    total: booking.total / nights,
+    total: booking.total,
+    nights: Math.max(1, booking.nights),
   };
 }
 
 /**
- * A stay's share of one period.
+ * What a stay contributes to one period.
  *
- * Revenue is recognised per night, so a stay running from July into August
- * belongs to both months in proportion. Any report listing bookings for a
- * period has to use this, or its total will not agree with the KPI above it —
- * which is precisely what a statement is meant to substantiate.
- *
- * Uses the same basis as `computeKpis`, deliberately: one definition of what a
- * night is worth, or the two drift.
+ * All of it, or none of it: the period that owns a booking is the one it
+ * arrived in. Reports listing bookings use this so their totals agree with the
+ * KPI above them.
  */
 export function bookingPeriodShare(
   booking: Booking,
   range: DateRange,
 ): { nights: number; revenue: number } {
-  const nights = nightsWithinRange(booking.check_in, booking.check_out, range);
-  if (nights <= 0) return { nights: 0, revenue: 0 };
-  return { nights, revenue: Math.round(nightlyBases(booking).total * nights) };
+  if (!isWithin(booking.check_in, range)) return { nights: 0, revenue: 0 };
+  const amounts = bookingAmounts(booking);
+  return { nights: amounts.nights, revenue: amounts.total };
 }
 
 export interface AnalyticsInput {
@@ -105,6 +116,8 @@ export function computeKpis(input: AnalyticsInput, range: DateRange): KpiSet {
   let revenue = 0;
   let roomRevenue = 0;
   let nightsSold = 0;
+  // Nights belonging to the bookings recognised here — ADR's denominator.
+  let nightsBooked = 0;
   let arrivals = 0;
   let cancellations = 0;
   let stayNightsTotal = 0;
@@ -126,17 +139,24 @@ export function computeKpis(input: AnalyticsInput, range: DateRange): KpiSet {
 
     if (!isLive(booking)) continue;
 
+    // Money: the whole booking, on the month it arrived in.
+    if (arrivesInRange) {
+      const amounts = bookingAmounts(booking);
+      revenue += amounts.total;
+      roomRevenue += amounts.room;
+      nightsBooked += amounts.nights;
+
+      const balance = booking.total - (paidByBooking.get(booking.id) ?? 0);
+      if (balance > 0) outstanding += balance;
+    }
+
+    // Occupancy: the nights actually inside the window, whoever owns the money.
+    // A stay carried over from last month still occupies the apartment.
     const nights = nightsWithinRange(booking.check_in, booking.check_out, range);
-    if (nights <= 0) continue;
-
-    const basis = nightlyBases(booking);
-    revenue += basis.total * nights;
-    roomRevenue += basis.room * nights;
-    nightsSold += nights;
-    activeGuestIds.add(booking.guest_id);
-
-    const balance = booking.total - (paidByBooking.get(booking.id) ?? 0);
-    if (balance > 0) outstanding += balance;
+    if (nights > 0) {
+      nightsSold += nights;
+      activeGuestIds.add(booking.guest_id);
+    }
   }
 
   const expenseTotal = expenses
@@ -161,7 +181,9 @@ export function computeKpis(input: AnalyticsInput, range: DateRange): KpiSet {
     nightsSold,
     nightsAvailable,
     occupancyRate: nightsAvailable ? nightsSold / nightsAvailable : 0,
-    adr: nightsSold ? Math.round(roomRevenue / nightsSold) : 0,
+    // Divided by the nights of the bookings recognised above, not by nights
+    // sold — the two populations differ once recognition moves to check-in.
+    adr: nightsBooked ? Math.round(roomRevenue / nightsBooked) : 0,
     revpar: nightsAvailable ? Math.round(roomRevenue / nightsAvailable) : 0,
     avgLengthOfStay: arrivals ? stayNightsTotal / arrivals : 0,
     availableApartments: apartments.filter((a) => a.status === "available").length,
@@ -238,8 +260,14 @@ export function computeTrend(
     }
     if (!isLive(booking)) continue;
 
-    const basis = nightlyBases(booking);
-    // Walk only the nights that actually fall inside the window.
+    // Money lands whole in the bucket the stay arrived in.
+    if (isWithin(booking.check_in, range)) {
+      const arrival = buckets.get(bucketKey(booking.check_in, granularity));
+      if (arrival) arrival.revenue += bookingAmounts(booking).total;
+    }
+
+    // Nights are still walked one at a time — occupancy is a fact about the
+    // calendar and belongs to whichever bucket each night falls in.
     const from = booking.check_in > range.start ? booking.check_in : range.start;
     const untilExclusive = dayjs(range.end).add(1, "day").format("YYYY-MM-DD");
     const to = booking.check_out < untilExclusive ? booking.check_out : untilExclusive;
@@ -247,10 +275,7 @@ export function computeTrend(
     const end = dayjs(to);
     while (cursor.isBefore(end, "day")) {
       const point = buckets.get(bucketKey(cursor.format("YYYY-MM-DD"), granularity));
-      if (point) {
-        point.revenue += basis.total;
-        point.nightsSold += 1;
-      }
+      if (point) point.nightsSold += 1;
       cursor = cursor.add(1, "day");
     }
   }
@@ -294,10 +319,8 @@ function toSlices<K extends string>(
 export function revenueBySource(bookings: Booking[], range: DateRange): BreakdownSlice[] {
   const totals = new Map<BookingSource, number>();
   for (const booking of bookings) {
-    if (!isLive(booking)) continue;
-    const nights = nightsWithinRange(booking.check_in, booking.check_out, range);
-    if (nights <= 0) continue;
-    const value = nightlyBases(booking).total * nights;
+    if (!isLive(booking) || !isWithin(booking.check_in, range)) continue;
+    const value = bookingAmounts(booking).total;
     totals.set(booking.source, (totals.get(booking.source) ?? 0) + value);
   }
   return toSlices(totals, (key) => BOOKING_SOURCE_LABELS[key]);
@@ -363,10 +386,16 @@ export function computeApartmentPerformance(
 
   const stats = new Map<
     string,
-    { revenue: number; room: number; nights: number; bookings: number; stayNights: number; cancelled: number }
+    {
+      revenue: number; room: number; nights: number; nightsBooked: number;
+      bookings: number; stayNights: number; cancelled: number;
+    }
   >();
   for (const apartment of apartments) {
-    stats.set(apartment.id, { revenue: 0, room: 0, nights: 0, bookings: 0, stayNights: 0, cancelled: 0 });
+    stats.set(apartment.id, {
+      revenue: 0, room: 0, nights: 0, nightsBooked: 0,
+      bookings: 0, stayNights: 0, cancelled: 0,
+    });
   }
 
   for (const booking of bookings) {
@@ -382,12 +411,16 @@ export function computeApartmentPerformance(
     }
 
     if (!isLive(booking)) continue;
-    const nights = nightsWithinRange(booking.check_in, booking.check_out, range);
-    if (nights <= 0) continue;
-    const basis = nightlyBases(booking);
-    entry.revenue += basis.total * nights;
-    entry.room += basis.room * nights;
-    entry.nights += nights;
+
+    // Money on arrival, nights on the calendar — the same split as the KPIs.
+    if (isWithin(booking.check_in, range)) {
+      const amounts = bookingAmounts(booking);
+      entry.revenue += amounts.total;
+      entry.room += amounts.room;
+      entry.nightsBooked += amounts.nights;
+    }
+
+    entry.nights += nightsWithinRange(booking.check_in, booking.check_out, range);
   }
 
   const expenseTotals = new Map<string, number>();
@@ -415,7 +448,7 @@ export function computeApartmentPerformance(
       nightsSold: entry.nights,
       nightsAvailable,
       occupancy: nightsAvailable ? entry.nights / nightsAvailable : 0,
-      adr: entry.nights ? Math.round(entry.room / entry.nights) : 0,
+      adr: entry.nightsBooked ? Math.round(entry.room / entry.nightsBooked) : 0,
       revpar: nightsAvailable ? Math.round(entry.room / nightsAvailable) : 0,
       bookings: entry.bookings,
       avgStay: entry.bookings ? entry.stayNights / entry.bookings : 0,
@@ -528,18 +561,25 @@ export function computeSeasonality(input: AnalyticsInput, years: number[]): Seas
     }
   }
 
+  const booked = new Array(12).fill(0);
+
   for (const booking of input.bookings) {
     if (!isLive(booking)) continue;
-    const basis = nightlyBases(booking);
-    let cursor = dayjs(booking.check_in);
+
+    // Money in the month of arrival.
+    const arrival = dayjs(booking.check_in);
+    if (years.includes(arrival.year())) {
+      const amounts = bookingAmounts(booking);
+      revenue[arrival.month()] += amounts.total;
+      room[arrival.month()] += amounts.room;
+      booked[arrival.month()] += amounts.nights;
+    }
+
+    // Nights in the months they were actually slept in.
+    let cursor = arrival;
     const end = dayjs(booking.check_out);
     while (cursor.isBefore(end, "day")) {
-      if (years.includes(cursor.year())) {
-        const month = cursor.month();
-        revenue[month] += basis.total;
-        room[month] += basis.room;
-        nights[month] += 1;
-      }
+      if (years.includes(cursor.year())) nights[cursor.month()] += 1;
       cursor = cursor.add(1, "day");
     }
   }
@@ -549,6 +589,6 @@ export function computeSeasonality(input: AnalyticsInput, years: number[]): Seas
     label: dayjs().month(month).format("MMM"),
     revenue: Math.round(revenue[month]),
     occupancy: available[month] ? nights[month] / available[month] : 0,
-    adr: nights[month] ? Math.round(room[month] / nights[month]) : 0,
+    adr: booked[month] ? Math.round(room[month] / booked[month]) : 0,
   }));
 }

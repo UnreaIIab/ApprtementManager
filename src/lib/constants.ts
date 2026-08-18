@@ -95,8 +95,8 @@ export const BOOKING_STATUS_META: Record<BookingStatus, StatusMeta> = {
     get label() {
       return strings().status.booking.checked_out;
     },
-    color: "var(--ink-3)",
-    chip: "bg-neutral-wash text-ink-2 border-line",
+    color: "var(--departed)",
+    chip: "bg-departed-wash text-ink border-departed/30",
     icon: "LogOut",
   },
   cancelled: {

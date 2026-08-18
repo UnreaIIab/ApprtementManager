@@ -342,7 +342,6 @@ export default function GuestProfilePage({ params }: { params: Promise<{ id: str
           rowKey={(row) => row.id}
           onRowClick={(row) => router.push(`/bookings?booking=${row.id}`)}
           emptyTitle={t.apartments.noBookingsYet}
-          maxHeight="calc(100dvh - 460px)"
         />
       ) : null}
 

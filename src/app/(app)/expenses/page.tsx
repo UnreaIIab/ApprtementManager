@@ -5,7 +5,7 @@ import { useQueryParam } from "@/hooks/use-query-param";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  Download, MoreHorizontal, Paperclip, Pencil, Plus, Receipt, RefreshCw, Search, Trash2,
+  Download, MoreHorizontal, Paperclip, Pencil, Plus, Receipt, RefreshCw, Search, Trash2, Repeat,
 } from "lucide-react";
 import { toast } from "sonner";
 import { expenseSchema, type ExpenseFormValues } from "@/lib/schemas";
@@ -100,6 +100,9 @@ function ExpensesView() {
   );
 
   const filteredTotal = filtered.reduce((acc, expense) => acc + expense.amount, 0);
+  const recurringInPeriod = inRange
+    .filter((expense) => expense.is_recurring)
+    .reduce((acc, expense) => acc + expense.amount, 0);
   const recurringTotal = filtered
     .filter((expense) => expense.is_recurring)
     .reduce((acc, expense) => acc + expense.amount, 0);
@@ -116,8 +119,11 @@ function ExpensesView() {
   const remove = async (expense: ExpenseWithRelations) => {
     const ok = await confirm({
       title: t.expenses.deleteConfirm,
-      message: `${expense.vendor ?? expenseCategoryLabel(expense.category)} · ${money(expense.amount)} will be removed.`,
-      confirmLabel: "Delete",
+      message: t.expenses.deleteMessage(
+        expense.vendor ?? expenseCategoryLabel(expense.category),
+        money(expense.amount),
+      ),
+      confirmLabel: t.common.delete,
       destructive: true,
     });
     if (ok) deleteExpense.mutate(expense.id);
@@ -316,7 +322,13 @@ function ExpensesView() {
         }
       />
 
-      <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+      {/*
+        Costs only. Revenue and profit belong to the dashboard and the reports —
+        repeating them here made the page about the P&L rather than about what
+        was spent, and a figure shown in three places is a figure that can
+        disagree with itself.
+      */}
+      <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-3">
         <KpiCard
           label={t.expenses.totalExpenses}
           value={money(kpis.expenses, { cents: false })}
@@ -325,14 +337,10 @@ function ExpensesView() {
           icon={<Receipt />}
         />
         <KpiCard
-          label={t.dashboard.revenue}
-          value={money(kpis.revenue, { cents: false })}
-          delta={delta("revenue")}
-        />
-        <KpiCard
-          label={t.reports.profitAfterExpenses}
-          value={money(kpis.netProfit, { cents: false })}
-          delta={delta("netProfit")}
+          label={t.expenses.recurringInPeriod}
+          value={money(recurringInPeriod, { cents: false })}
+          hint={t.expenses.committedCosts}
+          icon={<Repeat />}
         />
         <KpiCard
           label={t.reports.expenseRatio}
@@ -545,13 +553,15 @@ function ExpensesView() {
           filtered.length > 0 ? (
             <div className="flex flex-wrap items-center gap-x-6 gap-y-1 border-t border-line bg-surface-2 px-4 py-2.5 text-[12.5px]">
               <span className="text-ink-3">
-                Totals for <span className="text-ink">{filtered.length}</span> entries
+                {t.expenses.totalsFor(filtered.length)}
               </span>
               <span className="text-ink-2">
-                Amount <span className="font-medium text-ink tnum">{money(filteredTotal)}</span>
+                {t.common.amount}{" "}
+                <span className="font-medium text-ink tnum">{money(filteredTotal)}</span>
               </span>
               <span className="text-ink-2">
-                Recurring <span className="font-medium text-ink tnum">{money(recurringTotal)}</span>
+                {t.expenses.recurringPlural}{" "}
+                <span className="font-medium text-ink tnum">{money(recurringTotal)}</span>
               </span>
             </div>
           ) : null

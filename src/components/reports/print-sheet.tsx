@@ -52,11 +52,9 @@ export function ReportPrintSheet({
    * detail disagree with the summary it is supposed to substantiate.
    */
   /*
-   * Each row reports the stay's share of *this period*, not the whole booking:
-   * a stay running from last month into this one contributes only its nights
-   * here, which is how the summary above counts it. Reporting the full booking
-   * total would make the column add up to more than the revenue it is meant to
-   * explain.
+   * Every row is a whole booking. Revenue is recognised on the check-in date,
+   * so a stay belongs entirely to the period it arrived in and there is nothing
+   * to apportion — the column adds up to exactly the revenue above it.
    */
   const live = bookings
     .filter((booking) => booking.status !== "cancelled" && booking.status !== "no_show")
@@ -70,10 +68,6 @@ export function ReportPrintSheet({
   const bookingTotal = live.reduce((sum, e) => sum + e.share.revenue, 0);
   const bookingPaid = live.reduce((sum, e) => sum + e.booking.paid, 0);
   const bookingBalance = live.reduce((sum, e) => sum + e.booking.balance, 0);
-  // A stay only partly inside the period is marked, and the footnote says why.
-  const anySpanning = live.some(
-    (e) => e.booking.check_in < range.start || e.booking.check_out > range.end,
-  );
   const expenseTotal = costs.reduce((sum, expense) => sum + expense.amount, 0);
 
   const company = organization?.legal_name || organization?.name || "";
@@ -155,21 +149,16 @@ export function ReportPrintSheet({
               <th>{t.printReport.colCheckIn}</th>
               <th>{t.printReport.colCheckOut}</th>
               <th className="ps-num">{t.printReport.colNights}</th>
-              <th className="ps-num">{t.printReport.colRevenuePeriod}</th>
+              <th className="ps-num">{t.printReport.colTotal}</th>
               <th className="ps-num">{t.printReport.colPaid}</th>
               <th className="ps-num">{t.printReport.colBalance}</th>
             </tr>
           </thead>
           <tbody>
             {live.map(({ booking, share }) => {
-              const spans =
-                booking.check_in < range.start || booking.check_out > range.end;
               return (
                 <tr key={booking.id}>
-                  <td>
-                    {booking.reference}
-                    {spans ? <span className="ps-mark">*</span> : null}
-                  </td>
+                  <td>{booking.reference}</td>
                   <td>{booking.apartment?.name ?? "—"}</td>
                   <td>{fullName(booking.guest)}</td>
                   <td>{formatDate(booking.check_in)}</td>
@@ -231,7 +220,6 @@ export function ReportPrintSheet({
 
       <footer className="ps-foot">
         <span>
-          {anySpanning ? `${t.printReport.spanningNote} ` : ""}
           {t.printReport.cancelledExcluded}
           {apartment ? ` ${t.printReport.portfolioWideExcluded}` : ""}
         </span>

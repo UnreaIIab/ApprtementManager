@@ -46,6 +46,17 @@
   --critical-wash: #fbecec;
   --info: #2a78d6;
   --info-wash: #eaf2fd;
+  /*
+   * Departed. A reserved status colour, not a chart series — the categorical
+   * palette must stay free for data.
+   *
+   * Deliberately a deeper red than `--critical`, which cancellations already
+   * use. Both appear together in the bookings table, and a stay that ended
+   * normally must not look like one that was called off; the darker, less
+   * saturated tone reads as "closed" rather than "alert".
+   */
+  --departed: #9c2f3c;
+  --departed-wash: #fbecee;
   --neutral-wash: #f1f1ef;
 
   /* Positive / negative deltas (text contrast, distinct from series green) */
@@ -108,6 +119,8 @@
   --critical-wash: #2c1616;
   --info: #3987e5;
   --info-wash: #131f2e;
+  --departed: #e08a94;
+  --departed-wash: #2a1619;
   --neutral-wash: #24262a;
 
   --delta-up: #0ca30c;
@@ -161,6 +174,8 @@
   --color-critical-wash: var(--critical-wash);
   --color-info: var(--info);
   --color-info-wash: var(--info-wash);
+  --color-departed: var(--departed);
+  --color-departed-wash: var(--departed-wash);
   --color-neutral-wash: var(--neutral-wash);
   --color-delta-up: var(--delta-up);
   --color-delta-down: var(--delta-down);

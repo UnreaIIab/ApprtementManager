@@ -621,7 +621,6 @@ export default function ApartmentProfilePage({
           onRowClick={(row) => router.push(`/bookings?booking=${row.id}`)}
           emptyTitle={t.apartments.noBookingsYet}
           emptyDescription={t.apartments.reservationsAppearHere}
-          maxHeight="calc(100dvh - 460px)"
         />
       ) : null}
 
@@ -632,7 +631,6 @@ export default function ApartmentProfilePage({
           rowKey={(row) => row.id}
           emptyTitle={t.apartments.noExpenses}
           emptyDescription={t.apartments.costsAppearHere}
-          maxHeight="calc(100dvh - 460px)"
           footer={
             apartmentExpenses.length > 0 ? (
               <div className="flex items-center justify-end gap-2 border-t border-line bg-surface-2 px-4 py-2.5 text-[13px]">
@@ -653,7 +651,6 @@ export default function ApartmentProfilePage({
           rowKey={(row) => row.id}
           emptyTitle={t.apartments.nothingScheduled}
           emptyDescription={t.apartments.tasksAppearHere}
-          maxHeight="calc(100dvh - 460px)"
         />
       ) : null}
 

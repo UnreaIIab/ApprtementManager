@@ -401,7 +401,6 @@ function ApartmentsView() {
           sort={sort}
           onSortChange={setSort}
           onRowClick={(row) => router.push(`/apartments/${row.apartment.id}`)}
-          maxHeight="calc(100dvh - 380px)"
         />
       )}
 

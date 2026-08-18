@@ -52,7 +52,15 @@ interface DataTableProps<T> {
   bulkActions?: (selected: string[]) => ReactNode;
   pageSize?: number;
   paginate?: boolean;
-  /** Caps body height so the sticky header has something to stick to. */
+  /**
+   * Caps body height so the sticky header has something to stick to.
+   *
+   * Only for a table that *is* the page — a list screen where the shell around
+   * it does not scroll. On a page where the table is one block among charts and
+   * cards, an inner scroll area swallows the wheel on the way down and the page
+   * appears to stop moving. Leave it unset there and let the page scroll as one;
+   * pagination already bounds how many rows render.
+   */
   maxHeight?: string;
   className?: string;
   rowClassName?: (row: T) => string | undefined;
