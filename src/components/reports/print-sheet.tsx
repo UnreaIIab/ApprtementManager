@@ -3,6 +3,7 @@
 import { formatDate, formatDateRange, fullName, money, number, percent } from "@/lib/format";
 import { dayjs } from "@/lib/date-range";
 import { bookingPeriodShare } from "@/data/analytics";
+import { PrintCalendar } from "./print-calendar";
 import { expenseCategoryLabel } from "@/lib/constants";
 import { useT } from "@/i18n";
 import type {
@@ -34,6 +35,8 @@ export function ReportPrintSheet({
   bookings,
   expenses,
   apartment,
+  apartments,
+  calendarBookings,
 }: {
   organization: Organization | null | undefined;
   range: DateRange;
@@ -43,6 +46,15 @@ export function ReportPrintSheet({
   expenses: ExpenseWithRelations[];
   /** The unit this report covers; null for the whole portfolio. */
   apartment: Apartment | null;
+  /** Rows of the calendar — the scoped portfolio. */
+  apartments: Apartment[];
+  /**
+   * Stays *overlapping* the period, which is a wider set than the ones whose
+   * revenue it recognises. A stay carried over from last month occupies days in
+   * this one, and a calendar that omitted it would show the apartment as free
+   * when it was not.
+   */
+  calendarBookings: BookingWithRelations[];
 }) {
   const t = useT();
 
@@ -134,6 +146,9 @@ export function ReportPrintSheet({
           </tbody>
         </table>
       </div>
+
+      {/* --- Calendar ------------------------------------------------ */}
+      <PrintCalendar apartments={apartments} bookings={calendarBookings} range={range} />
 
       {/* --- Bookings ------------------------------------------------ */}
       <h2 className="ps-section">{t.printReport.bookingsTable}</h2>

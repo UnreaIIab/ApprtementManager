@@ -909,6 +909,12 @@ export const en: Dictionary = {
   },
 
   reports: {
+    tabCalendar: "Check-ins & check-outs",
+    calendarHint: "Every day in the period: who arrives, who leaves, and the turnover days where both fall together.",
+    arrivalsLegend: "Check-ins",
+    departuresLegend: "Check-outs",
+    turnoverLegend: "Same-day turnover",
+    noMovements: "No check-ins or check-outs in this period",
     thisPeriod: "This period",
     lastYear: "Last year",
     occupancyAdrNote: "Occupancy shown as a percentage; ADR gets its own chart to avoid a second axis.",
@@ -1085,6 +1091,7 @@ export const en: Dictionary = {
   },
 
   printReport: {
+    calendar: "STAY CALENDAR",
     spanningNote: "* Stay spanning the period: nights and revenue shown are this period's; paid and balance are for the whole booking.",
     colNightsPeriod: "Nights",
     colRevenuePeriod: "Period revenue",

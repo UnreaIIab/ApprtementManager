@@ -923,6 +923,12 @@ export const fr = {
   },
 
   reports: {
+    tabCalendar: "Arrivées et départs",
+    calendarHint: "Chaque jour de la période : qui arrive, qui part, et les jours de rotation où les deux tombent ensemble.",
+    arrivalsLegend: "Arrivées",
+    departuresLegend: "Départs",
+    turnoverLegend: "Rotation le même jour",
+    noMovements: "Aucune arrivée ni départ sur cette période",
     thisPeriod: "Cette période",
     lastYear: "L’an dernier",
     occupancyAdrNote: "L’occupation est en pourcentage ; l’ADR a son propre graphique pour éviter un second axe.",
@@ -1099,6 +1105,7 @@ export const fr = {
   },
 
   printReport: {
+    calendar: "CALENDRIER DES SÉJOURS",
     spanningNote: "* Séjour à cheval sur la période : les nuits et le chiffre d’affaires indiqués sont ceux de la période ; le payé et le solde portent sur la réservation entière.",
     colNightsPeriod: "Nuits",
     colRevenuePeriod: "CA période",

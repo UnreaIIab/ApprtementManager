@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Download, FileSpreadsheet, Sparkles, Wrench } from "lucide-react";
+import { Download, FileSpreadsheet, Sparkles, Wrench
+} from "lucide-react";
 import {
   bookingsBySource, capSlices, computeCashFlow, computeOccupancyByDay,
   computeSeasonality, expensesByCategory, revenueBySource,
@@ -120,6 +121,22 @@ export default function ReportsPage() {
           (!scopeId || b.apartment_id === scopeId),
       ),
     [bookings, range, scopeId],
+  );
+
+  const calendarBookings = useMemo(
+    () =>
+      bookings.filter(
+        (b) =>
+          b.check_in <= range.end &&
+          b.check_out > range.start &&
+          (!scopeId || b.apartment_id === scopeId),
+      ),
+    [bookings, range, scopeId],
+  );
+
+  const scopedApartments = useMemo(
+    () => (scopeId ? apartments.filter((a) => a.id === scopeId) : apartments),
+    [apartments, scopeId],
   );
 
   const inRangeExpenses = useMemo(
@@ -313,6 +330,8 @@ export default function ReportsPage() {
         bookings={inRangeBookings}
         expenses={inRangeExpenses}
         apartment={scopedApartment}
+        apartments={scopedApartments}
+        calendarBookings={calendarBookings}
       />
 
       <div className="no-print">

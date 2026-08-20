@@ -380,10 +380,40 @@
     line-height: 1.32;
   }
 
-  .print-sheet * {
-    /* One tone throughout: colour costs ink and does not survive a photocopier. */
-    color: #000 !important;
-    background: transparent !important;
+  /*
+   * The sheet carries its own palette in literal values, not theme tokens.
+   * `var(--ink)` is near-white in dark mode, and a report printed from a dark
+   * screen would come out invisible. Nothing here reads the theme.
+   *
+   * Colour is used where it means something — a booking's status, the profit
+   * line, the head of a table — and stays light enough to photocopy. All text
+   * remains near-black; no figure depends on a hue to be read.
+   */
+  .print-sheet {
+    --p-ink: #16161a;
+    --p-muted: #5f5f66;
+    --p-rule: #b9b9c2;
+    --p-hair: #e2e2e8;
+    /*
+     * Deep navy rather than the app's pink-red. The screen brand is a call to
+     * action; on a statement handed to an accountant it reads as an alarm, and
+     * a red rule under a profit figure suggests the opposite of what it says.
+     * Navy is the convention for financial documents and stays clearly a
+     * colour rather than sliding back into black.
+     */
+    --p-brand: #1e3a5f;
+    --p-tint: #f5f5f8;
+
+    --p-pending: #a9760a;
+    --p-pending-bg: #fdf5e4;
+    --p-confirmed: #1f66bd;
+    --p-confirmed-bg: #eaf2fc;
+    --p-checked_in: #0a8a3c;
+    --p-checked_in-bg: #eaf7ee;
+    --p-checked_out: #9c2f3c;
+    --p-checked_out-bg: #fbeef0;
+
+    color: var(--p-ink);
   }
 
   .ps-head {
@@ -391,7 +421,7 @@
     justify-content: space-between;
     align-items: flex-start;
     gap: 12mm;
-    border-bottom: 1.2pt solid #000;
+    border-bottom: 1.6pt solid var(--p-brand);
     padding-bottom: 2mm;
     margin-bottom: 3mm;
   }
@@ -407,20 +437,32 @@
     font-size: 10pt;
     font-weight: 700;
     letter-spacing: 0.08em;
+    color: var(--p-brand);
   }
   .ps-meta {
     font-size: 7.4pt;
+    color: var(--p-muted);
   }
 
   .ps-section {
     font-size: 8pt;
     font-weight: 700;
     letter-spacing: 0.09em;
-    border-bottom: 0.6pt solid #000;
+    border-bottom: 0.6pt solid var(--p-rule);
     padding-bottom: 0.8mm;
     margin: 4mm 0 1.5mm;
+    display: flex;
+    align-items: center;
+    gap: 1.6mm;
     /* Never leave a heading stranded at the foot of a page. */
     break-after: avoid;
+  }
+  .ps-section::before {
+    content: "";
+    width: 1.2mm;
+    height: 2.8mm;
+    background: var(--p-brand);
+    border-radius: 0.4mm;
   }
 
   /* The two summary columns read down, the way a statement is read. */
@@ -446,26 +488,35 @@
   }
 
   .ps-summary .ps-table td {
-    border-bottom: 0.4pt dotted #666;
+    border-bottom: 0.4pt dotted var(--p-rule);
   }
+  /* The line the whole statement exists to produce. */
   .ps-strong td {
     font-weight: 700;
-    border-bottom: 0.8pt solid #000 !important;
+    background: var(--p-tint);
+    border-top: 0.6pt solid var(--p-rule);
+    border-bottom: 0.8pt solid var(--p-brand) !important;
   }
 
   .ps-detail th {
     text-align: left;
     font-weight: 700;
     font-size: 7.4pt;
-    border-bottom: 0.8pt solid #000;
+    background: var(--p-tint);
+    border-bottom: 0.8pt solid var(--p-rule);
     white-space: nowrap;
   }
   .ps-detail td {
-    border-bottom: 0.3pt solid #bbb;
+    border-bottom: 0.3pt solid var(--p-hair);
+  }
+  /* A faint band every other row, so a wide line is followed across. */
+  .ps-detail tbody tr:nth-child(even) td {
+    background: #fafafc;
   }
   .ps-detail tfoot td {
     font-weight: 700;
-    border-top: 0.8pt solid #000;
+    background: var(--p-tint);
+    border-top: 0.8pt solid var(--p-rule);
     border-bottom: none;
   }
   /* A row split across a page break is unreadable; a repeated header is not. */
@@ -475,6 +526,108 @@
   .ps-detail tr {
     break-inside: avoid;
   }
+
+  /* --- Stay calendar ------------------------------------------- */
+  .ps-cal {
+    margin-bottom: 2mm;
+    /* A month must not be split across a page break; half a grid is unreadable. */
+    break-inside: avoid;
+  }
+  .ps-cal-month {
+    font-size: 7.4pt;
+    font-weight: 700;
+    margin-bottom: 0.6mm;
+  }
+  .ps-cal-head,
+  .ps-cal-row {
+    display: flex;
+    align-items: stretch;
+  }
+  .ps-cal-name {
+    width: 30mm;
+    flex: none;
+    font-size: 7pt;
+    padding-right: 1.5mm;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    align-self: center;
+  }
+  .ps-cal-track {
+    position: relative;
+    flex: 1;
+    display: flex;
+    min-width: 0;
+  }
+  .ps-cal-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1mm 4mm;
+    margin-bottom: 1.4mm;
+    font-size: 6.4pt;
+    color: var(--p-muted);
+  }
+  .ps-cal-legend li {
+    display: flex;
+    align-items: center;
+    gap: 1.2mm;
+  }
+  .ps-cal-key {
+    width: 2.6mm;
+    height: 2.2mm;
+    border-radius: 0.5mm;
+    border: 0.4pt solid currentColor;
+  }
+
+  .ps-cal-day {
+    font-size: 5.6pt;
+    text-align: center;
+    line-height: 3.2mm;
+    color: var(--p-muted);
+    border-right: 0.2pt solid var(--p-hair);
+  }
+  .ps-cal-cell {
+    height: 4.4mm;
+    border-right: 0.2pt solid var(--p-hair);
+    border-bottom: 0.2pt solid var(--p-hair);
+  }
+  .ps-cal-weekend {
+    background: #f0f0f4 !important;
+  }
+  .ps-cal-row:nth-child(even) .ps-cal-cell {
+    background: #fbfbfd;
+  }
+
+  .ps-cal-bar {
+    position: absolute;
+    top: 0.45mm;
+    bottom: 0.45mm;
+    border: 0.4pt solid currentColor;
+    /*
+     * A solid left edge in the status colour. Borders print even when the
+     * browser's "background graphics" option is off, so the status survives a
+     * setting the reader controls and I do not.
+     */
+    border-left-width: 1.2pt;
+    border-radius: 0.7mm;
+    display: flex;
+    align-items: center;
+    padding: 0 0.9mm;
+    overflow: hidden;
+  }
+  .ps-cal-guest {
+    font-size: 5.8pt;
+    color: var(--p-ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* One rule per status; `currentColor` carries it to the border and the key. */
+  .ps-cal-pending { color: var(--p-pending); background: var(--p-pending-bg); }
+  .ps-cal-confirmed { color: var(--p-confirmed); background: var(--p-confirmed-bg); }
+  .ps-cal-checked_in { color: var(--p-checked_in); background: var(--p-checked_in-bg); }
+  .ps-cal-checked_out { color: var(--p-checked_out); background: var(--p-checked_out-bg); }
 
   .ps-mark {
     font-weight: 700;
@@ -491,7 +644,8 @@
     gap: 8mm;
     margin-top: 4mm;
     padding-top: 1.5mm;
-    border-top: 0.6pt solid #000;
+    border-top: 0.6pt solid var(--p-rule);
     font-size: 6.8pt;
+    color: var(--p-muted);
   }
 }
