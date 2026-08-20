@@ -1138,6 +1138,7 @@ export const fr = {
     colCheckIn: "Arrivée",
     colCheckOut: "Départ",
     colNights: "Nuits",
+    colNightly: "Prix/nuit",
     colTotal: "Total",
     colPaid: "Payé",
     colBalance: "Solde",

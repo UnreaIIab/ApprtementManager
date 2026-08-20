@@ -79,7 +79,6 @@ export function ReportPrintSheet({
   const bookingNights = live.reduce((sum, e) => sum + e.share.nights, 0);
   const bookingTotal = live.reduce((sum, e) => sum + e.share.revenue, 0);
   const bookingPaid = live.reduce((sum, e) => sum + e.booking.paid, 0);
-  const bookingBalance = live.reduce((sum, e) => sum + e.booking.balance, 0);
   const expenseTotal = costs.reduce((sum, expense) => sum + expense.amount, 0);
 
   const company = organization?.legal_name || organization?.name || "";
@@ -164,9 +163,9 @@ export function ReportPrintSheet({
               <th>{t.printReport.colCheckIn}</th>
               <th>{t.printReport.colCheckOut}</th>
               <th className="ps-num">{t.printReport.colNights}</th>
+              <th className="ps-num">{t.printReport.colNightly}</th>
               <th className="ps-num">{t.printReport.colTotal}</th>
               <th className="ps-num">{t.printReport.colPaid}</th>
-              <th className="ps-num">{t.printReport.colBalance}</th>
             </tr>
           </thead>
           <tbody>
@@ -179,9 +178,11 @@ export function ReportPrintSheet({
                   <td>{formatDate(booking.check_in)}</td>
                   <td>{formatDate(booking.check_out)}</td>
                   <td className="ps-num">{share.nights}</td>
+                  <td className="ps-num">
+                    {share.nights ? money(share.revenue / share.nights) : "—"}
+                  </td>
                   <td className="ps-num">{money(share.revenue)}</td>
                   <td className="ps-num">{money(booking.paid)}</td>
-                  <td className="ps-num">{money(booking.balance)}</td>
                 </tr>
               );
             })}
@@ -190,9 +191,11 @@ export function ReportPrintSheet({
             <tr>
               <td colSpan={5}>{t.printReport.total}</td>
               <td className="ps-num">{bookingNights}</td>
+              <td className="ps-num">
+                {bookingNights ? money(bookingTotal / bookingNights) : "—"}
+              </td>
               <td className="ps-num">{money(bookingTotal)}</td>
               <td className="ps-num">{money(bookingPaid)}</td>
-              <td className="ps-num">{money(bookingBalance)}</td>
             </tr>
           </tfoot>
         </table>
