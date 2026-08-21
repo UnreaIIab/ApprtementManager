@@ -870,6 +870,8 @@ export const fr = {
     reference: "Référence",
     removePayment: "Supprimer le paiement",
     removeConfirm: "Supprimer ce paiement ?",
+    removeMessage: (amount: string) =>
+      `${amount} sera supprimé et le solde de la réservation remontera d’autant.`,
     depositPlaceholder: "Acompte, solde, motif de remboursement…",
     openBooking: "Ouvrir la réservation",
     noBooking: "Aucune réservation",

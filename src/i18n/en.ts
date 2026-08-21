@@ -856,6 +856,8 @@ export const en: Dictionary = {
     reference: "Reference",
     removePayment: "Remove payment",
     removeConfirm: "Remove this payment?",
+    removeMessage: (amount: string) =>
+      `${amount} will be removed and the booking balance will go back up.`,
     depositPlaceholder: "Deposit, balance, refund reason…",
     openBooking: "Open booking",
     noBooking: "No booking",

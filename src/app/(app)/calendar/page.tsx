@@ -88,7 +88,17 @@ export default function CalendarPage() {
   const [appliedQuery, setAppliedQuery] = useState<AvailabilityQueryState | null>(null);
   const [onlyAvailable, setOnlyAvailable] = useState(false);
 
-  const [selected, setSelected] = useState<BookingWithRelations | null>(null);
+  /*
+   * The id, not the booking: the drawer edits money on the reservation — a
+   * payment recorded or removed changes `paid` and `balance` — and a copy held
+   * in state would keep showing the figures as they were when the bar was
+   * clicked. Resolving against the live list each render keeps the header in
+   * step with the ledger below it.
+   */
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selected = selectedId
+    ? (bookings.find((booking) => booking.id === selectedId) ?? null)
+    : null;
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<BookingWithRelations | null>(null);
   const [formDefaults, setFormDefaults] = useState<{
@@ -445,7 +455,7 @@ export default function CalendarPage() {
               : null
           }
           availability={resultsById}
-          onBookingClick={setSelected}
+          onBookingClick={(booking) => setSelectedId(booking.id)}
           onCreate={openNew}
           onChange={handleChange}
           size={expanded ? "large" : "normal"}
@@ -461,9 +471,9 @@ export default function CalendarPage() {
     <>
       <BookingDrawer
         booking={selected}
-        onClose={() => setSelected(null)}
+        onClose={() => setSelectedId(null)}
         onEdit={(booking) => {
-          setSelected(null);
+          setSelectedId(null);
           setEditing(booking);
           setFormDefaults(undefined);
           setFormOpen(true);

@@ -18,7 +18,7 @@ import {
 } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import {
-  useActivity, useAddNote, useDeleteBooking, useInvoices, useNotes,
+  useActivity, useAddNote, useDeleteBooking, useDeletePayment, useInvoices, useNotes,
   usePayments, useUpdateBooking,
 } from "@/data/queries";
 import { Drawer, useConfirm } from "@/components/ui/overlay";
@@ -60,6 +60,7 @@ export function BookingDrawer({
   const activity = useActivity("booking", booking?.id);
   const updateBooking = useUpdateBooking();
   const deleteBooking = useDeleteBooking();
+  const deletePayment = useDeletePayment();
   const addNote = useAddNote();
   const { confirm, dialog } = useConfirm();
 
@@ -99,6 +100,24 @@ export function BookingDrawer({
     if (status === "checked_out") patch.actual_check_out = new Date().toISOString();
     if (status === "cancelled") patch.cancelled_at = new Date().toISOString();
     updateBooking.mutate({ id: booking.id, patch });
+  };
+
+  /*
+   * Payments are the ledger the header totals are derived from, so removing one
+   * moves the money on the booking — hence a confirmation that names the amount.
+   * The snapshot is invalidated by the mutation, and `paid` / `balance` are
+   * recomputed from the remaining payments, so nothing here needs patching by
+   * hand.
+   */
+  const removePayment = async (payment: (typeof bookingPayments)[number]) => {
+    const ok = await confirm({
+      title: t.payments.removeConfirm,
+      message: t.payments.removeMessage(money(payment.amount)),
+      confirmLabel: t.payments.removePayment,
+      destructive: true,
+    });
+    if (!ok) return;
+    deletePayment.mutate(payment.id);
   };
 
   const remove = async () => {
@@ -421,6 +440,13 @@ export function BookingDrawer({
                       </p>
                     </div>
                     <StatusBadge size="sm" meta={PAYMENT_STATUS_META[payment.status]} />
+                    <IconButton
+                      label={t.payments.removePayment}
+                      icon={<Trash2 className="size-3.5" />}
+                      disabled={deletePayment.isPending}
+                      onClick={() => void removePayment(payment)}
+                      className="text-ink-3 hover:text-critical"
+                    />
                   </li>
                 ))}
               </ul>

@@ -137,7 +137,7 @@ function PaymentsView() {
   const remove = async (payment: PaymentWithRelations) => {
     const ok = await confirm({
       title: t.payments.removeConfirm,
-      message: `${money(payment.amount)} will be removed and the booking balance will go back up.`,
+      message: t.payments.removeMessage(money(payment.amount)),
       confirmLabel: t.payments.removePayment,
       destructive: true,
     });
